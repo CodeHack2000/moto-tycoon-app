@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#12151c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>MOTO TYCOON · Banqueiro</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="style.css">
+  <script src="vendor/html5-qrcode.min.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-title"><span class="brand-moto">MOTO</span><span class="brand-tycoon">TYCOON</span></span>
+      <span class="brand-sub">Terminal Bancário · Street &amp; Garage</span>
+    </div>
+  </header>
+
+  <!-- ============ CONFIGURAÇÃO DO JOGO ============ -->
+  <main id="setupView" class="view" hidden>
+    <section class="card">
+      <h2 class="card-title">Novo Jogo</h2>
+      <label class="field">
+        <span class="field-label">Saldo inicial por jogador</span>
+        <span class="input-money">
+          <input id="setupBalance" type="text" inputmode="numeric" autocomplete="off" value="7.500">
+          <span class="input-suffix">€</span>
+        </span>
+      </label>
+      <div class="field">
+        <span class="field-label">Número de jogadores</span>
+        <div id="setupCount" class="segmented" role="radiogroup">
+          <button type="button" data-count="2">2</button>
+          <button type="button" data-count="3">3</button>
+          <button type="button" data-count="4">4</button>
+        </div>
+      </div>
+    </section>
+
+    <div id="setupPlayers" class="setup-players"></div>
+
+    <button id="startGameBtn" type="button" class="btn btn-primary btn-xl">🏁 Iniciar Jogo</button>
+  </main>
+
+  <!-- ============ JOGO ============ -->
+  <main id="gameView" class="view" hidden>
+    <nav class="tabs" role="tablist">
+      <button type="button" class="tab" role="tab" data-tab="bank" aria-selected="true">🏦 Banco</button>
+      <button type="button" class="tab" role="tab" data-tab="auction" aria-selected="false">🔨 Leilão</button>
+      <button type="button" class="tab" role="tab" data-tab="history" aria-selected="false">📜 Histórico</button>
+    </nav>
+
+    <!-- Banco -->
+    <section id="tab-bank" class="tab-panel" role="tabpanel">
+      <button id="scanBtn" type="button" class="btn btn-scan">
+        <span class="scan-icon" aria-hidden="true"></span>
+        LER CARTÃO
+      </button>
+
+      <div id="playerGrid" class="player-grid"></div>
+
+      <div class="section-head">
+        <h3 class="section-title">Últimas transações</h3>
+        <button type="button" class="link-btn" data-goto="history">Ver tudo →</button>
+      </div>
+      <ul id="recentLog" class="log"></ul>
+    </section>
+
+    <!-- Leilão -->
+    <section id="tab-auction" class="tab-panel" role="tabpanel" hidden>
+      <form id="auctionForm" class="card" autocomplete="off" onsubmit="return false">
+        <h2 class="card-title">Calculadora de Venda / Leilão</h2>
+
+        <label class="field">
+          <span class="field-label">1 · Preço base da mota</span>
+          <span class="input-money">
+            <input id="aucBase" type="text" inputmode="numeric" placeholder="ex: 9.000">
+            <span class="input-suffix">€</span>
+          </span>
+        </label>
+
+        <fieldset class="field">
+          <legend class="field-label">2 · Avaria 1</legend>
+          <div id="aucDmg1" class="choice-grid cols-2"></div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend class="field-label">3 · Avaria 2</legend>
+          <div id="aucDmg2" class="choice-grid cols-2"></div>
+        </fieldset>
+
+        <fieldset class="field">
+          <legend class="field-label">4 · Resultado dos dados no leilão</legend>
+          <div id="aucMarket" class="choice-grid"></div>
+        </fieldset>
+
+        <div class="field">
+          <span class="field-label">5 · Bónus / desconto extra (opcional)</span>
+          <div class="stepper">
+            <button type="button" class="btn btn-ghost" data-bonus-step="-5">−5</button>
+            <span class="input-money">
+              <input id="aucBonus" type="number" inputmode="numeric" step="5" min="-100" max="200" value="0">
+              <span class="input-suffix">%</span>
+            </span>
+            <button type="button" class="btn btn-ghost" data-bonus-step="5">+5</button>
+          </div>
+          <div id="aucBonusPresets" class="chips"></div>
+        </div>
+
+        <div class="breakdown">
+          <div><span>Preço base</span><strong id="bdBase">0 €</strong></div>
+          <div><span>Avarias</span><strong id="bdDamage">0%</strong></div>
+          <div><span>Valor ajustado</span><strong id="bdAdjusted">0 €</strong></div>
+          <div><span>Leilão + bónus</span><strong id="bdFactor">× 1,00</strong></div>
+        </div>
+        <button id="aucClear" type="button" class="link-btn">Limpar calculadora</button>
+      </form>
+
+      <div class="result-card">
+        <span class="result-label">Valor final de venda</span>
+        <output id="aucFinal" class="result-value">0 €</output>
+        <button id="aucCreditBtn" type="button" class="btn btn-primary btn-xl" disabled>
+          📷 Creditar este Valor ao Jogador
+        </button>
+      </div>
+    </section>
+
+    <!-- Histórico -->
+    <section id="tab-history" class="tab-panel" role="tabpanel" hidden>
+      <div class="section-head">
+        <h3 class="section-title">Histórico de transações</h3>
+        <button id="undoBtn" type="button" class="btn btn-ghost btn-sm">↶ Anular última</button>
+      </div>
+      <ul id="fullLog" class="log"></ul>
+
+      <button id="resetBtn" type="button" class="btn btn-danger btn-xl">⟲ Reiniciar Jogo</button>
+    </section>
+  </main>
+
+  <!-- ============ FICHA DO JOGADOR ============ -->
+  <dialog id="playerModal" class="sheet">
+    <div class="sheet-head">
+      <span id="pmPawn" class="pawn pawn-lg"></span>
+      <div class="sheet-head-text">
+        <h2 id="pmName"></h2>
+        <small id="pmCode"></small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="balance-box">
+      <span class="balance-label">Saldo atual</span>
+      <strong id="pmBalance" class="balance-value">0 €</strong>
+      <span id="pmDelta" class="balance-delta"></span>
+    </div>
+
+    <div id="pmQuick" class="quick-actions"></div>
+
+    <div class="custom-amount">
+      <span class="field-label">Valor personalizado</span>
+      <span class="input-money input-lg">
+        <input id="pmAmount" type="text" inputmode="numeric" placeholder="0">
+        <span class="input-suffix">€</span>
+      </span>
+      <div id="pmChips" class="chips chips-fill"></div>
+      <input id="pmReason" class="input-plain" type="text" placeholder="Motivo (opcional) — ex: Compra de mota" maxlength="60">
+      <div class="btn-row">
+        <button id="pmSub" type="button" class="btn btn-minus btn-xl">− Subtrair</button>
+        <button id="pmAdd" type="button" class="btn btn-plus btn-xl">+ Adicionar</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- ============ SCANNER ============ -->
+  <dialog id="scanModal" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2 id="scanTitle">Ler Cartão</h2>
+        <small id="scanSubtitle">Aponta a câmara para o QR Code do cartão</small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div class="reader-wrap">
+      <div id="reader"></div>
+    </div>
+    <p id="scanMsg" class="scan-msg"></p>
+    <div class="manual-pick">
+      <span class="field-label">Sem câmara? Escolhe o jogador manualmente:</span>
+      <div id="scanManual" class="chips chips-fill"></div>
+    </div>
+  </dialog>
+
+  <!-- ============ CONFIRMAÇÃO ============ -->
+  <dialog id="confirmModal" class="sheet sheet-small">
+    <form method="dialog">
+      <h2 id="confirmTitle" class="confirm-title"></h2>
+      <p id="confirmMsg" class="confirm-msg"></p>
+      <div class="btn-row">
+        <button value="cancel" class="btn btn-ghost btn-xl">Cancelar</button>
+        <button id="confirmOk" value="ok" class="btn btn-danger btn-xl">Confirmar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MOTO TYCOON · Cartões dos Jogadores</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <style>
+    /* =========================================================
+       MOTO TYCOON · Cartões de débito dos jogadores (A4)
+       Imprimir a 100% com "Gráficos de fundo" ativo.
+       Cada linha = frente | verso → recortar, dobrar ao meio e colar.
+       ========================================================= */
+    @page { size: A4 portrait; margin: 0; }
+
+    :root {
+      --bg: #12151c;
+      --cyan: #2ec4b6;
+      --magenta: #ff007f;
+      --card-w: 85.6mm;
+      --card-h: 53.98mm;
+      --bleed: 1.5mm;
+    }
+
+    * { box-sizing: border-box; }
+    html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    body {
+      margin: 0;
+      background: #2a2f3a;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+
+    /* ---------- Barra (só no ecrã) ---------- */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 12px 20px;
+      padding: 12px 16px;
+      background: var(--bg);
+      color: #e9eef6;
+      border-bottom: 1px solid #2d3547;
+      font-size: 14px;
+    }
+    .toolbar button {
+      min-height: 44px;
+      padding: 0 22px;
+      border: 0;
+      border-radius: 12px;
+      background: var(--cyan);
+      color: #061412;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 0 18px rgba(46, 196, 182, .45);
+    }
+    .toolbar span { color: #8b95a9; }
+    .toolbar b { color: var(--magenta); }
+
+    /* ---------- Folha A4 ---------- */
+    .sheet {
+      width: 210mm;
+      height: 297mm;
+      margin: 10mm auto;
+      padding: 11mm 0 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #fff;
+      color: #1b1f27;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, .5);
+      overflow: hidden;
+    }
+    .sheet-head { text-align: center; margin-bottom: 8mm; }
+    .sheet-head h1 {
+      margin: 0;
+      font-size: 5.6mm;
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: .05em;
+    }
+    .sheet-head h1 .t { color: var(--magenta); }
+    .sheet-head h1 .m { color: #1a9e92; }
+    .sheet-head p { margin: 1mm 0 0; font-size: 2.8mm; color: #5d6575; letter-spacing: .04em; }
+
+    .rows { display: grid; gap: 8mm; }
+
+    /* ---------- Par frente | verso ---------- */
+    .pair {
+      position: relative;
+      display: flex;
+      width: calc(var(--card-w) * 2);
+      height: var(--card-h);
+      outline: var(--bleed) solid var(--bg); /* margem de corte: evita fios brancos */
+    }
+    .marks {
+      position: absolute;
+      left: -6mm;
+      top: -6mm;
+      width: calc(var(--card-w) * 2 + 12mm);
+      height: calc(var(--card-h) + 12mm);
+      fill: none;
+      stroke: #000;
+      stroke-width: .2;
+      pointer-events: none;
+    }
+    .marks .fold { stroke-dasharray: .8 .6; }
+
+    .card {
+      position: relative;
+      width: var(--card-w);
+      height: var(--card-h);
+      overflow: hidden;
+      color: #e9eef6;
+    }
+
+    /* ---------- Frente ---------- */
+    .front {
+      background:
+        radial-gradient(70mm 45mm at 100% 0%, color-mix(in srgb, var(--pc) 45%, transparent), transparent 70%),
+        radial-gradient(60mm 40mm at 0% 100%, rgba(46, 196, 182, .18), transparent 70%),
+        repeating-linear-gradient(135deg, rgba(255, 255, 255, .025) 0 .6mm, transparent .6mm 2.4mm),
+        var(--bg);
+    }
+    .front::after { /* faixa com a cor do peão */
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1.4mm;
+      background: var(--pc);
+    }
+    .brand { position: absolute; left: 6mm; top: 4.6mm; display: grid; gap: .4mm; }
+    .brand-title {
+      font-family: "Arial Black", "Segoe UI Black", Impact, sans-serif;
+      font-size: 4.4mm;
+      font-style: italic;
+      font-weight: 900;
+      letter-spacing: .06em;
+      line-height: 1;
+    }
+    .b-moto { color: var(--cyan); }
+    .b-tycoon { color: var(--magenta); margin-left: .25em; }
+    .brand-sub { font-size: 1.55mm; letter-spacing: .3em; text-transform: uppercase; color: #a3acbd; }
+
+    .badge {
+      position: absolute;
+      right: 5.5mm;
+      top: 5mm;
+      padding: .7mm 2mm;
+      border: .25mm solid var(--pc);
+      border-radius: 5mm;
+      color: var(--pc);
+      font-size: 1.9mm;
+      font-weight: 800;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+    }
+
+    .chip {
+      position: absolute;
+      left: 7mm;
+      top: 17.5mm;
+      width: 11.5mm;
+      height: 8.8mm;
+      border-radius: 1.6mm;
+      background:
+        linear-gradient(90deg, transparent 32%, rgba(90, 60, 0, .45) 32% 35%, transparent 35% 65%, rgba(90, 60, 0, .45) 65% 68%, transparent 68%),
+        linear-gradient(0deg, transparent 30%, rgba(90, 60, 0, .45) 30% 34%, transparent 34% 66%, rgba(90, 60, 0, .45) 66% 70%, transparent 70%),
+        linear-gradient(135deg, #f8e3a1, #d4a640 45%, #f3d77f 70%, #b88a2a);
+      box-shadow: inset 0 0 0 .2mm rgba(90, 60, 0, .5);
+    }
+    .contactless {
+      position: absolute;
+      left: 20.5mm;
+      top: 18.6mm;
+      width: 6.5mm;
+      height: 6.5mm;
+      fill: none;
+      stroke: #c9d1de;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .number {
+      position: absolute;
+      left: 7mm;
+      top: 30mm;
+      font-family: "OCR A Std", "OCR A Extended", "Consolas", "Courier New", monospace;
+      font-size: 3.7mm;
+      font-weight: 700;
+      letter-spacing: .14em;
+      color: #f2f5fa;
+      text-shadow: 0 .2mm 0 rgba(0, 0, 0, .6);
+    }
+
+    .holder, .valid { position: absolute; bottom: 5.2mm; display: grid; gap: .3mm; }
+    .holder { left: 7mm; }
+    .valid { left: 42mm; }
+    .holder small, .valid small {
+      font-size: 1.4mm;
+      letter-spacing: .25em;
+      text-transform: uppercase;
+      color: #8b95a9;
+    }
+    .holder strong, .valid strong {
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 2.9mm;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+    }
+    .holder strong { color: var(--pc); }
+
+    .network { position: absolute; right: 5.5mm; bottom: 4.6mm; display: flex; }
+    .network span { width: 7mm; height: 7mm; border-radius: 50%; }
+    .network span:first-child { background: var(--cyan); }
+    .network span:last-child { background: var(--magenta); margin-left: -2.8mm; opacity: .85; }
+
+    .big-num {
+      position: absolute;
+      right: 5mm;
+      top: 11mm;
+      font-family: "Arial Black", Impact, sans-serif;
+      font-size: 17mm;
+      font-style: italic;
+      font-weight: 900;
+      line-height: 1;
+      color: transparent;
+      -webkit-text-stroke: .3mm color-mix(in srgb, var(--pc) 70%, transparent);
+      opacity: .7;
+    }
+
+    /* ---------- Verso ---------- */
+    .back {
+      background:
+        radial-gradient(60mm 40mm at 100% 100%, color-mix(in srgb, var(--pc) 30%, transparent), transparent 70%),
+        #0e1117;
+    }
+    .back::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 1.4mm;
+      background: var(--pc);
+    }
+    .stripe {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 4.5mm;
+      height: 8.5mm;
+      background: linear-gradient(180deg, #000, #23262d 50%, #000);
+    }
+    .qr-box {
+      position: absolute;
+      left: 4.5mm;
+      top: 16mm;
+      width: 33mm;
+      height: 33mm;
+      padding: 2.6mm; /* zona de silêncio branca à volta do QR */
+      background: #fff;
+      border-radius: 1.8mm;
+      box-shadow: 0 0 0 .5mm var(--pc);
+    }
+    .qr-box svg { display: block; width: 100%; height: 100%; fill: #000; }
+
+    .back-info {
+      position: absolute;
+      left: 41mm;
+      right: 4.5mm;
+      top: 16mm;
+      display: grid;
+      gap: 1.1mm;
+    }
+    .back-info small {
+      font-size: 1.35mm;
+      letter-spacing: .2em;
+      text-transform: uppercase;
+      color: #8b95a9;
+    }
+    .signature {
+      height: 7mm;
+      border-radius: .6mm;
+      background: repeating-linear-gradient(135deg, #fff 0 1.2mm, #e9edf3 1.2mm 2.4mm);
+    }
+    .code {
+      margin-top: 1mm;
+      font-family: "Consolas", "Courier New", monospace;
+      font-size: 2.6mm;
+      font-weight: 700;
+      letter-spacing: .04em;
+      color: var(--pc);
+    }
+    .fine { margin: 0; font-size: 1.55mm; line-height: 1.35; color: #8b95a9; }
+
+    /* ---------- Instruções ---------- */
+    .howto {
+      margin-top: auto;
+      margin-bottom: 9mm;
+      width: calc(var(--card-w) * 2);
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 4mm;
+      font-size: 2.4mm;
+      line-height: 1.35;
+      color: #4a5262;
+    }
+    .howto b { display: block; color: #1b1f27; font-size: 2.6mm; }
+
+    @media print {
+      body { background: #fff; }
+      .toolbar { display: none; }
+      .sheet { margin: 0; box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="toolbar">
+    <button type="button" onclick="window.print()">🖨️ Imprimir</button>
+    <span>A4 · Escala <b>100%</b> (tamanho real) · Ativa <b>“Gráficos de fundo”</b> · Margens: <b>Nenhuma</b></span>
+  </div>
+
+  <main class="sheet">
+    <header class="sheet-head">
+      <h1><span class="m">MOTO</span> <span class="t">TYCOON</span> · Cartões de Débito</h1>
+      <p>Street &amp; Garage Bank · Frente | Verso · Tamanho real 85,6 × 54 mm</p>
+    </header>
+
+    <div class="rows">
+    <!-- ===== Jogador 1 · MOTO_PLAYER_1 ===== -->
+    <div class="pair" style="--pc:#2ec4b6">
+      <svg class="marks" viewBox="0 0 183.2 65.98" aria-hidden="true">
+        <path d="M0 6h4M6 0v4M183.2 6h-4M177.2 0v4M0 59.98h4M6 65.98v-4M183.2 59.98h-4M177.2 65.98v-4"/>
+        <path class="fold" d="M91.6 0v4.2M91.6 65.98v-4.2"/>
+      </svg>
+      <div class="card front">
+        <div class="brand">
+          <span class="brand-title"><span class="b-moto">MOTO</span><span class="b-tycoon">TYCOON</span></span>
+          <span class="brand-sub">Street &amp; Garage Bank</span>
+        </div>
+        <span class="badge">Débito</span>
+        <div class="chip"></div>
+        <svg class="contactless" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7.5a6.5 6.5 0 0 1 0 9M12 5a10 10 0 0 1 0 14M16 2.5a13.5 13.5 0 0 1 0 19"/></svg>
+        <div class="number">MOTO 7500 0000 0001</div>
+        <div class="holder"><small>Titular</small><strong>Jogador 1</strong></div>
+        <div class="valid"><small>Válido até</small><strong>12/99</strong></div>
+        <div class="network" aria-hidden="true"><span></span><span></span></div>
+        <div class="big-num" aria-hidden="true">1</div>
+      </div>
+      <div class="card back">
+        <div class="stripe"></div>
+        <div class="qr-box"><svg viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="QR MOTO_PLAYER_1"><path d="M0 0h7v1h-7zM10 0h2v1h-2zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h2v1h-2zM12 1h1v1h-1zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM11 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM9 3h4v1h-4zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h2v1h-2zM12 4h1v1h-1zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h5v1h-5zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h7v1h-7zM10 7h3v1h-3zM0 8h1v1h-1zM3 8h1v1h-1zM5 8h2v1h-2zM8 8h1v1h-1zM10 8h1v1h-1zM13 8h1v1h-1zM15 8h1v1h-1zM2 9h1v1h-1zM4 9h2v1h-2zM9 9h3v1h-3zM13 9h1v1h-1zM15 9h1v1h-1zM18 9h2v1h-2zM1 10h7v1h-7zM10 10h1v1h-1zM12 10h1v1h-1zM14 10h2v1h-2zM17 10h1v1h-1zM20 10h1v1h-1zM4 11h2v1h-2zM7 11h1v1h-1zM9 11h1v1h-1zM11 11h1v1h-1zM14 11h2v1h-2zM17 11h1v1h-1zM20 11h1v1h-1zM0 12h2v1h-2zM3 12h5v1h-5zM12 12h4v1h-4zM17 12h3v1h-3zM8 13h1v1h-1zM10 13h1v1h-1zM12 13h1v1h-1zM14 13h3v1h-3zM0 14h7v1h-7zM9 14h5v1h-5zM15 14h5v1h-5zM0 15h1v1h-1zM6 15h1v1h-1zM8 15h2v1h-2zM12 15h1v1h-1zM15 15h1v1h-1zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM11 16h1v1h-1zM13 16h2v1h-2zM18 16h1v1h-1zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM8 17h4v1h-4zM14 17h1v1h-1zM17 17h4v1h-4zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM10 18h8v1h-8zM20 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM11 19h3v1h-3zM0 20h7v1h-7zM8 20h1v1h-1zM11 20h3v1h-3zM15 20h1v1h-1zM18 20h2v1h-2z"/></svg></div>
+        <div class="back-info">
+          <small>Assinatura do titular</small>
+          <div class="signature"></div>
+          <div class="code">MOTO_PLAYER_1</div>
+          <p class="fine">Apresenta este cartão ao Banqueiro para leitura. Válido apenas no circuito MOTO&nbsp;TYCOON. Se o encontrares, devolve-o na Garagem Central.</p>
+        </div>
+      </div>
+    </div>
+    <!-- ===== Jogador 2 · MOTO_PLAYER_2 ===== -->
+    <div class="pair" style="--pc:#ff007f">
+      <svg class="marks" viewBox="0 0 183.2 65.98" aria-hidden="true">
+        <path d="M0 6h4M6 0v4M183.2 6h-4M177.2 0v4M0 59.98h4M6 65.98v-4M183.2 59.98h-4M177.2 65.98v-4"/>
+        <path class="fold" d="M91.6 0v4.2M91.6 65.98v-4.2"/>
+      </svg>
+      <div class="card front">
+        <div class="brand">
+          <span class="brand-title"><span class="b-moto">MOTO</span><span class="b-tycoon">TYCOON</span></span>
+          <span class="brand-sub">Street &amp; Garage Bank</span>
+        </div>
+        <span class="badge">Débito</span>
+        <div class="chip"></div>
+        <svg class="contactless" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7.5a6.5 6.5 0 0 1 0 9M12 5a10 10 0 0 1 0 14M16 2.5a13.5 13.5 0 0 1 0 19"/></svg>
+        <div class="number">MOTO 7500 0000 0002</div>
+        <div class="holder"><small>Titular</small><strong>Jogador 2</strong></div>
+        <div class="valid"><small>Válido até</small><strong>12/99</strong></div>
+        <div class="network" aria-hidden="true"><span></span><span></span></div>
+        <div class="big-num" aria-hidden="true">2</div>
+      </div>
+      <div class="card back">
+        <div class="stripe"></div>
+        <div class="qr-box"><svg viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="QR MOTO_PLAYER_2"><path d="M0 0h7v1h-7zM8 0h1v1h-1zM10 0h1v1h-1zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM8 1h2v1h-2zM12 1h1v1h-1zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM8 2h1v1h-1zM12 2h1v1h-1zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM12 3h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h5v1h-5zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM10 5h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h7v1h-7zM9 7h1v1h-1zM0 8h1v1h-1zM3 8h6v1h-6zM11 8h1v1h-1zM13 8h1v1h-1zM16 8h1v1h-1zM18 8h3v1h-3zM1 9h2v1h-2zM4 9h2v1h-2zM7 9h2v1h-2zM10 9h1v1h-1zM12 9h1v1h-1zM14 9h1v1h-1zM16 9h2v1h-2zM20 9h1v1h-1zM0 10h1v1h-1zM2 10h1v1h-1zM5 10h3v1h-3zM10 10h5v1h-5zM19 10h2v1h-2zM4 11h2v1h-2zM11 11h1v1h-1zM13 11h1v1h-1zM16 11h1v1h-1zM18 11h2v1h-2zM0 12h2v1h-2zM4 12h1v1h-1zM6 12h1v1h-1zM9 12h1v1h-1zM11 12h2v1h-2zM14 12h1v1h-1zM18 12h1v1h-1zM8 13h1v1h-1zM10 13h2v1h-2zM13 13h1v1h-1zM17 13h4v1h-4zM0 14h7v1h-7zM8 14h3v1h-3zM12 14h1v1h-1zM16 14h1v1h-1zM18 14h1v1h-1zM0 15h1v1h-1zM6 15h1v1h-1zM8 15h1v1h-1zM10 15h2v1h-2zM13 15h2v1h-2zM16 15h5v1h-5zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM8 16h3v1h-3zM14 16h2v1h-2zM17 16h3v1h-3zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM8 17h2v1h-2zM12 17h2v1h-2zM15 17h2v1h-2zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM10 18h1v1h-1zM12 18h1v1h-1zM14 18h1v1h-1zM16 18h1v1h-1zM19 18h2v1h-2zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h2v1h-2zM14 19h7v1h-7zM0 20h7v1h-7zM8 20h2v1h-2zM12 20h1v1h-1zM17 20h2v1h-2z"/></svg></div>
+        <div class="back-info">
+          <small>Assinatura do titular</small>
+          <div class="signature"></div>
+          <div class="code">MOTO_PLAYER_2</div>
+          <p class="fine">Apresenta este cartão ao Banqueiro para leitura. Válido apenas no circuito MOTO&nbsp;TYCOON. Se o encontrares, devolve-o na Garagem Central.</p>
+        </div>
+      </div>
+    </div>
+    <!-- ===== Jogador 3 · MOTO_PLAYER_3 ===== -->
+    <div class="pair" style="--pc:#ffd23f">
+      <svg class="marks" viewBox="0 0 183.2 65.98" aria-hidden="true">
+        <path d="M0 6h4M6 0v4M183.2 6h-4M177.2 0v4M0 59.98h4M6 65.98v-4M183.2 59.98h-4M177.2 65.98v-4"/>
+        <path class="fold" d="M91.6 0v4.2M91.6 65.98v-4.2"/>
+      </svg>
+      <div class="card front">
+        <div class="brand">
+          <span class="brand-title"><span class="b-moto">MOTO</span><span class="b-tycoon">TYCOON</span></span>
+          <span class="brand-sub">Street &amp; Garage Bank</span>
+        </div>
+        <span class="badge">Débito</span>
+        <div class="chip"></div>
+        <svg class="contactless" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7.5a6.5 6.5 0 0 1 0 9M12 5a10 10 0 0 1 0 14M16 2.5a13.5 13.5 0 0 1 0 19"/></svg>
+        <div class="number">MOTO 7500 0000 0003</div>
+        <div class="holder"><small>Titular</small><strong>Jogador 3</strong></div>
+        <div class="valid"><small>Válido até</small><strong>12/99</strong></div>
+        <div class="network" aria-hidden="true"><span></span><span></span></div>
+        <div class="big-num" aria-hidden="true">3</div>
+      </div>
+      <div class="card back">
+        <div class="stripe"></div>
+        <div class="qr-box"><svg viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="QR MOTO_PLAYER_3"><path d="M0 0h7v1h-7zM8 0h1v1h-1zM10 0h2v1h-2zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h1v1h-1zM11 1h2v1h-2zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM9 2h1v1h-1zM11 2h2v1h-2zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h1v1h-1zM10 3h1v1h-1zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h1v1h-1zM10 4h1v1h-1zM12 4h1v1h-1zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h2v1h-2zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h7v1h-7zM8 7h1v1h-1zM10 7h3v1h-3zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h3v1h-3zM10 8h2v1h-2zM13 8h5v1h-5zM20 8h1v1h-1zM0 9h2v1h-2zM4 9h2v1h-2zM8 9h1v1h-1zM10 9h1v1h-1zM12 9h3v1h-3zM17 9h1v1h-1zM19 9h2v1h-2zM5 10h2v1h-2zM11 10h1v1h-1zM13 10h1v1h-1zM16 10h1v1h-1zM18 10h2v1h-2zM0 11h1v1h-1zM2 11h2v1h-2zM5 11h1v1h-1zM7 11h1v1h-1zM9 11h1v1h-1zM12 11h2v1h-2zM15 11h2v1h-2zM19 11h1v1h-1zM1 12h1v1h-1zM3 12h1v1h-1zM5 12h2v1h-2zM9 12h1v1h-1zM12 12h1v1h-1zM14 12h5v1h-5zM8 13h4v1h-4zM13 13h1v1h-1zM17 13h4v1h-4zM0 14h7v1h-7zM8 14h4v1h-4zM13 14h1v1h-1zM16 14h2v1h-2zM19 14h1v1h-1zM0 15h1v1h-1zM6 15h1v1h-1zM12 15h2v1h-2zM15 15h2v1h-2zM19 15h1v1h-1zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM8 16h1v1h-1zM11 16h1v1h-1zM13 16h2v1h-2zM18 16h1v1h-1zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM11 17h2v1h-2zM14 17h2v1h-2zM17 17h1v1h-1zM19 17h2v1h-2zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM10 18h1v1h-1zM13 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM9 19h1v1h-1zM11 19h3v1h-3zM0 20h7v1h-7zM8 20h2v1h-2zM12 20h1v1h-1zM14 20h5v1h-5zM20 20h1v1h-1z"/></svg></div>
+        <div class="back-info">
+          <small>Assinatura do titular</small>
+          <div class="signature"></div>
+          <div class="code">MOTO_PLAYER_3</div>
+          <p class="fine">Apresenta este cartão ao Banqueiro para leitura. Válido apenas no circuito MOTO&nbsp;TYCOON. Se o encontrares, devolve-o na Garagem Central.</p>
+        </div>
+      </div>
+    </div>
+    <!-- ===== Jogador 4 · MOTO_PLAYER_4 ===== -->
+    <div class="pair" style="--pc:#9b5de5">
+      <svg class="marks" viewBox="0 0 183.2 65.98" aria-hidden="true">
+        <path d="M0 6h4M6 0v4M183.2 6h-4M177.2 0v4M0 59.98h4M6 65.98v-4M183.2 59.98h-4M177.2 65.98v-4"/>
+        <path class="fold" d="M91.6 0v4.2M91.6 65.98v-4.2"/>
+      </svg>
+      <div class="card front">
+        <div class="brand">
+          <span class="brand-title"><span class="b-moto">MOTO</span><span class="b-tycoon">TYCOON</span></span>
+          <span class="brand-sub">Street &amp; Garage Bank</span>
+        </div>
+        <span class="badge">Débito</span>
+        <div class="chip"></div>
+        <svg class="contactless" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 7.5a6.5 6.5 0 0 1 0 9M12 5a10 10 0 0 1 0 14M16 2.5a13.5 13.5 0 0 1 0 19"/></svg>
+        <div class="number">MOTO 7500 0000 0004</div>
+        <div class="holder"><small>Titular</small><strong>Jogador 4</strong></div>
+        <div class="valid"><small>Válido até</small><strong>12/99</strong></div>
+        <div class="network" aria-hidden="true"><span></span><span></span></div>
+        <div class="big-num" aria-hidden="true">4</div>
+      </div>
+      <div class="card back">
+        <div class="stripe"></div>
+        <div class="qr-box"><svg viewBox="0 0 21 21" shape-rendering="crispEdges" role="img" aria-label="QR MOTO_PLAYER_4"><path d="M0 0h7v1h-7zM8 0h3v1h-3zM14 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM9 1h4v1h-4zM14 1h1v1h-1zM20 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h2v1h-2zM14 2h1v1h-1zM16 2h3v1h-3zM20 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM8 3h2v1h-2zM14 3h1v1h-1zM16 3h3v1h-3zM20 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM8 4h2v1h-2zM12 4h1v1h-1zM14 4h1v1h-1zM16 4h3v1h-3zM20 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM11 5h1v1h-1zM14 5h1v1h-1zM20 5h1v1h-1zM0 6h7v1h-7zM8 6h1v1h-1zM10 6h1v1h-1zM12 6h1v1h-1zM14 6h7v1h-7zM8 7h5v1h-5zM0 8h1v1h-1zM4 8h1v1h-1zM6 8h4v1h-4zM11 8h1v1h-1zM13 8h5v1h-5zM20 8h1v1h-1zM1 9h4v1h-4zM8 9h1v1h-1zM12 9h3v1h-3zM17 9h1v1h-1zM19 9h2v1h-2zM0 10h3v1h-3zM4 10h1v1h-1zM6 10h2v1h-2zM10 10h2v1h-2zM13 10h1v1h-1zM16 10h1v1h-1zM18 10h2v1h-2zM1 11h1v1h-1zM5 11h1v1h-1zM10 11h2v1h-2zM13 11h1v1h-1zM15 11h2v1h-2zM19 11h1v1h-1zM0 12h8v1h-8zM9 12h4v1h-4zM14 12h5v1h-5zM8 13h1v1h-1zM11 13h1v1h-1zM13 13h1v1h-1zM17 13h4v1h-4zM0 14h7v1h-7zM8 14h1v1h-1zM11 14h1v1h-1zM13 14h1v1h-1zM16 14h2v1h-2zM19 14h1v1h-1zM0 15h1v1h-1zM6 15h1v1h-1zM9 15h1v1h-1zM12 15h2v1h-2zM15 15h2v1h-2zM19 15h1v1h-1zM0 16h1v1h-1zM2 16h3v1h-3zM6 16h1v1h-1zM8 16h4v1h-4zM13 16h2v1h-2zM18 16h1v1h-1zM0 17h1v1h-1zM2 17h3v1h-3zM6 17h1v1h-1zM9 17h1v1h-1zM11 17h2v1h-2zM14 17h2v1h-2zM17 17h1v1h-1zM19 17h2v1h-2zM0 18h1v1h-1zM2 18h3v1h-3zM6 18h1v1h-1zM13 18h1v1h-1zM16 18h1v1h-1zM18 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM10 19h4v1h-4zM0 20h7v1h-7zM8 20h1v1h-1zM10 20h1v1h-1zM12 20h1v1h-1zM14 20h5v1h-5zM20 20h1v1h-1z"/></svg></div>
+        <div class="back-info">
+          <small>Assinatura do titular</small>
+          <div class="signature"></div>
+          <div class="code">MOTO_PLAYER_4</div>
+          <p class="fine">Apresenta este cartão ao Banqueiro para leitura. Válido apenas no circuito MOTO&nbsp;TYCOON. Se o encontrares, devolve-o na Garagem Central.</p>
+        </div>
+      </div>
+    </div>
+    </div>
+
+    <footer class="howto">
+      <div><b>1 · Imprimir</b>A4 a 100%, com gráficos de fundo. Ideal: cartolina 200–250 g/m².</div>
+      <div><b>2 · Recortar</b>Corta cada par pelas marcas dos cantos (linhas contínuas).</div>
+      <div><b>3 · Dobrar</b>Dobra ao meio pela marca tracejada, com o verso para trás.</div>
+      <div><b>4 · Colar</b>Cola as duas faces. Opcional: plastificar ou usar capa de cartão.</div>
+    </footer>
+  </main>
+</body>
+</html>

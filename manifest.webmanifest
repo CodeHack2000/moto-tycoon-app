@@ -1,0 +1,15 @@
+{
+  "name": "MOTO TYCOON · Terminal Bancário",
+  "short_name": "Banqueiro",
+  "description": "Terminal bancário e calculadora de leilão para o Banqueiro do MOTO TYCOON: Street & Garage.",
+  "lang": "pt-PT",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#12151c",
+  "theme_color": "#12151c",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
