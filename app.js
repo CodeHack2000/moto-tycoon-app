@@ -986,6 +986,7 @@ function renderGarage(p) {
   $('#gsValue').textContent = formatMoney(value);
   $('#gsPatrimony').textContent = formatMoney(patrimony(p));
   $('#pmEliminate').hidden = !(p.balance < 0 && !p.eliminated);
+  $('#pmHabeas').hidden = !(p.prisonTurns > 0);
   $('#pmAddMoto').hidden = Boolean(p.eliminated);
 
   $('#pmGarage').innerHTML = p.motos.map((m) => {
@@ -1108,6 +1109,14 @@ function initPlayerModal() {
     if (row) openMotoSheet(currentPlayerId, row.dataset.openMoto);
   });
   $('#pmEliminate').addEventListener('click', () => eliminatePlayer(currentPlayerId));
+  $('#pmHabeas').addEventListener('click', () => {
+    const p = getPlayer(currentPlayerId);
+    if (!p || !p.prisonTurns) return;
+    p.prisonTurns = 0;
+    addSystemLog(`📜 ${p.name} usou Habeas Corpus e saiu da Polícia.`);
+    refresh();
+    toast(`${p.name} saiu da Polícia. A Carta de Condução continua apreendida.`);
+  });
 
   playerModal.addEventListener('close', () => { currentPlayerId = null; });
 }
@@ -1706,6 +1715,7 @@ function renderPolice() {
           <button type="button" class="btn" data-po="surrender" data-pid="${pid}">🙌 Entregar-se</button>
           <button type="button" class="btn btn-plus" data-po="escaped" data-pid="${pid}">🏍️ Fugiu (4–6)</button>
           <button type="button" class="btn btn-minus" data-po="caught" data-pid="${pid}">🚔 Fuga falhou (1–3)</button>
+          <button type="button" class="btn btn-ghost po-habeas" data-po="habeas" data-pid="${pid}">📜 Usar Habeas Corpus</button>
         </div>`;
     } else if (po.stage === 'accident') {
       actions = `
@@ -1774,6 +1784,11 @@ function policeAction(btn) {
   if (action === 'surrender' || action === 'caught') {
     po.stage = 'done';
     po.text = intercept(p, po.uid, action === 'caught');
+  }
+  if (action === 'habeas') {
+    po.stage = 'done';
+    po.text = '📜 Habeas Corpus: evitou a detenção, sem penas.';
+    addSystemLog(`📜 ${p.name} usou Habeas Corpus e evitou a detenção na corrida.`);
   }
   renderRace();
 }
@@ -2280,7 +2295,10 @@ function renderAuctionMoto() {
   const ctxEl = $('#aucCtx');
   ctxEl.hidden = !auctionCtx;
   if (auctionCtx) {
-    ctxEl.innerHTML = `<span>Vendedor: ${playerTag(auctionCtx.sellerId)} · a mota sai da garagem ao vender</span>
+    const q = getPlayer(auctionCtx.sellerId).balance < 0 ? null : auctionQuotaFor(auctionCtx.sellerId);
+    let quota = '';
+    if (q) quota = q.sold < q.max ? ` · 🎲 venda ${q.sold + 1} de ${q.max}` : ' · ⚠️ acima do limite do dado';
+    ctxEl.innerHTML = `<span>Vendedor: ${playerTag(auctionCtx.sellerId)}${quota} · a mota sai da garagem ao vender</span>
       <button type="button" class="link-btn" data-auc-ctx-clear>✕</button>`;
   }
 }
@@ -2322,10 +2340,45 @@ function resetAuction() {
   calcAuction();
 }
 
+/* Dado do Leilão: quantas motas o jogador pode vender nesta visita (Leilão de Falência fica de fora). */
+const AUCTION_DIE = [
+  { faces: '1–2', max: 1 },
+  { faces: '3–4', max: 2 },
+  { faces: '5–6', max: 3 },
+];
+const turnKey = () => `${state.turn.round}-${state.turn.index}`;
+const auctionQuotaFor = (playerId) => {
+  const q = state.auctionQuota;
+  return q && q.playerId === playerId && q.turn === turnKey() ? q : null;
+};
+
+/** Pede o Dado do Leilão (uma vez por visita) e avisa quando o limite já foi usado. */
+async function ensureAuctionQuota(p) {
+  if (p.balance < 0) return true;
+  let q = auctionQuotaFor(p.id);
+  if (!q) {
+    const max = await choiceDialog('🎲 Dado do Leilão', `${p.name} lança 1 dado para saber quantas motas pode vender nesta visita.`,
+      AUCTION_DIE.map((d) => ({ value: d.max, title: `${d.faces} · até ${plural(d.max, 'mota', 'motas')}`, tone: 'none' })));
+    if (!max) return false;
+    q = state.auctionQuota = { playerId: p.id, turn: turnKey(), max, sold: 0 };
+    addSystemLog(`🎲 Dado do Leilão: ${p.name} pode vender até ${plural(max, 'mota', 'motas')} nesta visita.`);
+    saveState();
+  }
+  if (q.sold >= q.max) {
+    return confirmDialog(
+      'Limite do Dado do Leilão',
+      `${p.name} já vendeu ${plural(q.sold, 'mota', 'motas')} nesta visita (máximo ${q.max}). Vender mesmo assim?`,
+      'Vender',
+    );
+  }
+  return true;
+}
+
 /** Prepara o leilão de uma mota da garagem, já com as avarias dela. */
-function startAuctionFor(sellerId, uid) {
+async function startAuctionFor(sellerId, uid) {
   const m = getMoto(sellerId, uid);
   if (!m) return;
+  if (!(await ensureAuctionQuota(getPlayer(sellerId)))) return;
   resetAuction();
   auctionCtx = { sellerId, uid };
   auctionMoto = cardOf(m);
@@ -2355,6 +2408,8 @@ function finishGarageSale(buyerId) {
     removeMoto(seller, uid);
     addSystemLog(`🔨 ${seller.name} vendeu ${motoLabel(card)} ao Banco (Leilão). A carta vai para o fundo do baralho.`);
   }
+  const q = seller.balance < 0 ? null : auctionQuotaFor(sellerId);
+  if (q) q.sold += 1;
   checkRestauroSale(sellerId, m);
   refresh();
 }
