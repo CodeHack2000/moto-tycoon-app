@@ -1,6 +1,6 @@
 /* Service worker: guarda a app em cache para funcionar sem internet.
    Aumenta CACHE_VERSION sempre que alterares ficheiros da app. */
-const CACHE_VERSION = 'moto-banker-v4';
+const CACHE_VERSION = 'moto-banker-v5';
 
 // Catálogo das motas (define MOTAS): as miniaturas também ficam disponíveis offline.
 importScripts('./data/motas.js');

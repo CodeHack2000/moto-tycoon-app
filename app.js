@@ -8,7 +8,7 @@
 const STORAGE_KEY = 'motoTycoon.banker.v1';
 const QR_PREFIX = 'MOTO_PLAYER_';
 const MAX_PLAYERS = 4;
-const DEFAULT_BALANCE = 7500;
+const DEFAULT_BALANCE = 10000;
 const QR_LIB_CDN = 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js';
 const CATALOG = typeof MOTAS !== 'undefined' ? MOTAS : [];
 
@@ -19,7 +19,7 @@ const AMOUNT_CHIPS = [100, 500, 1000, 5000];
 const TRANSFER_REASONS = ['Aposta de corrida', 'Taxa de vaga (10%)', 'Compra no Leilão', 'Leilão de falência'];
 
 /* ---------- Regras do jogo (Manual v2) ---------- */
-const PARTIDA_BASE = 1000;
+const PARTIDA_BASE = 2000;
 const PARTIDA_TEN_PCT = 10;
 const CLASSIC_APPS_BONUS = 20;
 const CLASSIC_PARTIDA_BONUS = { Normal: 100, Rara: 250, 'Épica': 500, 'Lendária': 1000 };
@@ -140,6 +140,8 @@ function freshState(lastSetup = defaultSetup()) {
 /** Completa estados guardados por versões anteriores da app. */
 function normalizeState(s) {
   s.lastSetup = { ...defaultSetup(), ...(s.lastSetup || {}) };
+  // Regras 2.1: o saldo inicial passou de 7.500 € para 10.000 €
+  if (s.lastSetup.startBalance === 7500) s.lastSetup.startBalance = DEFAULT_BALANCE;
   s.players.forEach((p) => {
     p.motos = p.motos || [];
     p.prisonTurns = p.prisonTurns || 0;
@@ -1013,8 +1015,8 @@ function addMotoFlow(playerId) {
     const p = getPlayer(playerId);
     const achado = Math.round(card.aquisicao * (100 - ACHADO_DISCOUNT) / 100);
     const origin = await choiceDialog(`Adicionar ${motoLabel(card)}`, `Saldo de ${p.name}: ${formatMoney(p.balance)}`, [
-      { value: { price: card.aquisicao, label: 'Compra na Sucata / Feira' }, title: `🛒 Sucata / Feira · ${formatMoney(card.aquisicao)}`, sub: 'Depois marca as 2 avarias tiradas do baralho', tone: 'hot' },
-      { value: { price: achado, label: 'Achado de Garagem (−30%)' }, title: `🍀 Achado de Garagem · ${formatMoney(achado)}`, sub: 'Carta de Sorte: −30% (com as 2 avarias)', tone: 'hot' },
+      { value: { price: card.aquisicao, label: 'Compra na Sucata / Feira' }, title: `🛒 Sucata / Feira · ${formatMoney(card.aquisicao)}`, sub: 'Depois marca a avaria tirada do baralho', tone: 'hot' },
+      { value: { price: achado, label: 'Achado de Garagem (−30%)' }, title: `🍀 Achado de Garagem · ${formatMoney(achado)}`, sub: 'Carta de Sorte: −30% (com 1 avaria)', tone: 'hot' },
       { value: { price: 0, label: 'Mota inicial' }, title: '🏁 Mota inicial · grátis', sub: 'Marca a avaria inicial (se sair Crítica, volta ao baralho)', tone: 'fair' },
       { value: { price: 0, label: 'Registo sem pagamento' }, title: '📝 Sem pagamento', sub: 'Já foi paga noutro sítio', tone: 'none' },
     ]);
@@ -1030,7 +1032,7 @@ function addMotoFlow(playerId) {
     addSystemLog(`${p.name} · ${origin.label}: ${motoLabel(card)}.`);
     if (origin.price) transact(p.id, -origin.price, `${origin.label} · ${motoLabel(card)}`);
     else refresh();
-    openMotoSheet(p.id, moto.uid, origin.price || origin.label === 'Mota inicial' ? 'Marca agora as avarias tiradas do baralho.' : '');
+    openMotoSheet(p.id, moto.uid, origin.price || origin.label === 'Mota inicial' ? 'Marca agora a avaria tirada do baralho.' : '');
   });
 }
 
