@@ -1,14 +1,21 @@
 /* Service worker: guarda a app em cache para funcionar sem internet.
    Aumenta CACHE_VERSION sempre que alterares ficheiros da app. */
-const CACHE_VERSION = 'moto-banker-v1';
+const CACHE_VERSION = 'moto-banker-v3';
+
+// Catálogo das motas (define MOTAS): as miniaturas também ficam disponíveis offline.
+importScripts('./data/motas.js');
+
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './data/motas.js',
+  './regras.html',
   './vendor/html5-qrcode.min.js',
   './manifest.webmanifest',
   './icon.svg',
+  ...MOTAS.map((m) => `./${m.imagem}`),
 ];
 
 self.addEventListener('install', (event) => {

@@ -11,6 +11,7 @@
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="style.css">
   <script src="vendor/html5-qrcode.min.js" defer></script>
+  <script src="data/motas.js" defer></script>
   <script src="app.js" defer></script>
 </head>
 <body>
@@ -44,25 +45,68 @@
 
     <div id="setupPlayers" class="setup-players"></div>
 
+    <section class="card">
+      <h2 class="card-title">Condição de vitória</h2>
+      <div id="setupVictory" class="choice-grid"></div>
+    </section>
+
+    <section class="card">
+      <h2 class="card-title">Ordem de jogo</h2>
+      <p class="hint">O primeiro da lista começa. Ordena os restantes pelos lugares à mesa, no sentido dos ponteiros do relógio.</p>
+      <ol id="setupOrder" class="order-list"></ol>
+    </section>
+
     <button id="startGameBtn" type="button" class="btn btn-primary btn-xl">🏁 Iniciar Jogo</button>
   </main>
 
   <!-- ============ JOGO ============ -->
   <main id="gameView" class="view" hidden>
     <nav class="tabs" role="tablist">
-      <button type="button" class="tab" role="tab" data-tab="bank" aria-selected="true">🏦 Banco</button>
-      <button type="button" class="tab" role="tab" data-tab="auction" aria-selected="false">🔨 Leilão</button>
-      <button type="button" class="tab" role="tab" data-tab="history" aria-selected="false">📜 Histórico</button>
+      <button type="button" class="tab" role="tab" data-tab="bank" aria-selected="true"><span class="tab-ico" aria-hidden="true">🏦</span>Banco</button>
+      <button type="button" class="tab" role="tab" data-tab="apps" aria-selected="false"><span class="tab-ico" aria-hidden="true">📱</span>Apps</button>
+      <button type="button" class="tab" role="tab" data-tab="auction" aria-selected="false"><span class="tab-ico" aria-hidden="true">🔨</span>Leilão</button>
+      <button type="button" class="tab" role="tab" data-tab="rules" aria-selected="false"><span class="tab-ico" aria-hidden="true">📖</span>Regras</button>
+      <button type="button" class="tab" role="tab" data-tab="history" aria-selected="false"><span class="tab-ico" aria-hidden="true">📜</span>Histórico</button>
     </nav>
 
     <!-- Banco -->
     <section id="tab-bank" class="tab-panel" role="tabpanel">
+      <div id="turnCard" class="turn-card">
+        <div class="turn-meta">
+          <span id="turnRound" class="turn-round"></span>
+          <span id="victoryChip" class="victory-chip"></span>
+        </div>
+        <div id="timerBox" class="timer-box" hidden>
+          <span class="timer-label">⏱️ Tempo restante</span>
+          <strong id="timerValue" class="timer-value">45:00</strong>
+          <button id="timerToggle" type="button" class="btn btn-ghost btn-sm">⏸ Pausar</button>
+        </div>
+        <button id="turnPlayer" type="button" class="turn-player">
+          <span class="turn-label">Vez de</span>
+          <span class="turn-name"><span class="pawn pawn-lg"></span><span id="turnName"></span></span>
+          <span id="turnStatus" class="status-badges"></span>
+          <span id="turnNext" class="turn-next"></span>
+        </button>
+        <ul id="turnAlerts" class="turn-alerts"></ul>
+        <div class="turn-tools">
+          <button type="button" class="btn btn-sm" data-turn-tool="partida">🏁 Partida</button>
+          <button type="button" class="btn btn-sm" data-turn-tool="race">🏎️ Corrida</button>
+          <button type="button" class="btn btn-sm" data-turn-tool="stop">🚔 Op. Stop</button>
+        </div>
+        <div class="turn-actions">
+          <button id="turnBack" type="button" class="btn btn-ghost" aria-label="Voltar ao jogador anterior">↶</button>
+          <button id="turnNextBtn" type="button" class="btn btn-primary">Próximo jogador ▶</button>
+        </div>
+      </div>
+
       <button id="scanBtn" type="button" class="btn btn-scan">
         <span class="scan-icon" aria-hidden="true"></span>
         LER CARTÃO
       </button>
 
       <div id="playerGrid" class="player-grid"></div>
+
+      <button id="bankTransferBtn" type="button" class="btn btn-xl btn-transfer">⇄ Transferência entre jogadores</button>
 
       <div class="section-head">
         <h3 class="section-title">Últimas transações</h3>
@@ -71,18 +115,29 @@
       <ul id="recentLog" class="log"></ul>
     </section>
 
+    <!-- Apps -->
+    <section id="tab-apps" class="tab-panel" role="tabpanel" hidden>
+      <p class="hint hint-top">Cada casa de App tem uma vaga única. Os contratos descontam 1 volta sempre que o dono passa na Partida.</p>
+      <div id="appSlots" class="app-slots"></div>
+    </section>
+
     <!-- Leilão -->
     <section id="tab-auction" class="tab-panel" role="tabpanel" hidden>
+      <div id="aucCtx" class="auc-ctx" hidden></div>
       <form id="auctionForm" class="card" autocomplete="off" onsubmit="return false">
-        <h2 class="card-title">Calculadora de Venda / Leilão</h2>
+        <h2 class="card-title">Venda no Leilão</h2>
 
-        <label class="field">
-          <span class="field-label">1 · Preço base da mota</span>
-          <span class="input-money">
-            <input id="aucBase" type="text" inputmode="numeric" placeholder="ex: 9.000">
-            <span class="input-suffix">€</span>
-          </span>
-        </label>
+        <div class="field">
+          <span class="field-label">1 · Mota à venda</span>
+          <button id="aucPickMoto" type="button" class="moto-pick"></button>
+          <label class="field-sub">
+            <span>ou escreve o Valor de Venda da carta</span>
+            <span class="input-money">
+              <input id="aucBase" type="text" inputmode="numeric" placeholder="ex: 11.500">
+              <span class="input-suffix">€</span>
+            </span>
+          </label>
+        </div>
 
         <fieldset class="field">
           <legend class="field-label">2 · Avaria 1</legend>
@@ -95,38 +150,103 @@
         </fieldset>
 
         <fieldset class="field">
-          <legend class="field-label">4 · Resultado dos dados no leilão</legend>
+          <legend class="field-label">4 · Resultado dos 5 dados (sem relançamentos)</legend>
           <div id="aucMarket" class="choice-grid"></div>
         </fieldset>
 
-        <div class="field">
-          <span class="field-label">5 · Bónus / desconto extra (opcional)</span>
-          <div class="stepper">
-            <button type="button" class="btn btn-ghost" data-bonus-step="-5">−5</button>
-            <span class="input-money">
-              <input id="aucBonus" type="number" inputmode="numeric" step="5" min="-100" max="200" value="0">
-              <span class="input-suffix">%</span>
-            </span>
-            <button type="button" class="btn btn-ghost" data-bonus-step="5">+5</button>
-          </div>
-          <div id="aucBonusPresets" class="chips"></div>
-        </div>
-
         <div class="breakdown">
-          <div><span>Preço base</span><strong id="bdBase">0 €</strong></div>
+          <div><span>Valor de Venda</span><strong id="bdBase">0 €</strong></div>
           <div><span>Avarias</span><strong id="bdDamage">0%</strong></div>
           <div><span>Valor ajustado</span><strong id="bdAdjusted">0 €</strong></div>
-          <div><span>Leilão + bónus</span><strong id="bdFactor">× 1,00</strong></div>
+          <div><span>Resultado dos dados</span><strong id="bdFactor">× 1,00</strong></div>
         </div>
         <button id="aucClear" type="button" class="link-btn">Limpar calculadora</button>
       </form>
 
       <div class="result-card">
-        <span class="result-label">Valor final de venda</span>
+        <span class="result-label">Valor base do leilão</span>
         <output id="aucFinal" class="result-value">0 €</output>
-        <button id="aucCreditBtn" type="button" class="btn btn-primary btn-xl" disabled>
-          📷 Creditar este Valor ao Jogador
-        </button>
+        <p class="result-hint">Os outros jogadores podem licitar a partir deste valor. Se ninguém licitar, o Banco compra por este valor.</p>
+        <div class="btn-row">
+          <button id="aucBankBtn" type="button" class="btn btn-primary" disabled>🏦 Vendida ao Banco</button>
+          <button id="aucPlayerBtn" type="button" class="btn btn-plus" disabled>🤝 Vendida a jogador</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Regras -->
+    <section id="tab-rules" class="tab-panel" role="tabpanel" hidden>
+      <a class="btn btn-primary btn-xl" href="regras.html" target="_blank" rel="noopener">📖 Abrir o Manual de Regras completo</a>
+
+      <h3 class="section-title ref-title">Partida (por volta)</h3>
+      <div class="card ref-card">
+        <p><strong>1.000 €</strong> + <strong>10%</strong> do rendimento nas Apps de cada mota (com desconto das avarias) + <strong>rendimento das motas nas Apps</strong> + bónus das Clássicas.</p>
+        <p class="ref-small">Bónus das Clássicas: Normal +100 € · Rara +250 € · Épica +500 € · Lendária +1.000 €. As Clássicas rendem +20% nas Apps.</p>
+      </div>
+
+      <h3 class="section-title ref-title">Reparação na Oficina</h3>
+      <div class="table-scroll">
+        <table class="ref-table">
+          <thead><tr><th>Raridade</th><th class="t-orange">Estética</th><th class="t-yellow">Moderada</th><th class="t-red">Crítica</th></tr></thead>
+          <tbody>
+            <tr><th>Normal</th><td>150 €</td><td>400 €</td><td>1.000 €</td></tr>
+            <tr><th>Rara</th><td>400 €</td><td>1.000 €</td><td>2.500 €</td></tr>
+            <tr><th>Épica</th><td>1.000 €</td><td>2.500 €</td><td>6.000 €</td></tr>
+            <tr><th>Lendária</th><td>3.000 €</td><td>8.000 €</td><td>20.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ref-small">Efeito no valor: Estética −10% · Moderada −25% · Crítica −50% (somam-se). Rendimento nas Apps: Moderada −50% · Crítica = mota parada.</p>
+
+      <h3 class="section-title ref-title">Multas da Operação Stop (por avaria)</h3>
+      <div class="table-scroll">
+        <table class="ref-table">
+          <thead><tr><th>Raridade</th><th class="t-orange">Estética</th><th class="t-yellow">Moderada</th><th class="t-red">Crítica</th></tr></thead>
+          <tbody>
+            <tr><th>Normal</th><td>75 €</td><td>200 €</td><td>500 €</td></tr>
+            <tr><th>Rara</th><td>200 €</td><td>500 €</td><td>1.250 €</td></tr>
+            <tr><th>Épica</th><td>500 €</td><td>1.250 €</td><td>3.000 €</td></tr>
+            <tr><th>Lendária</th><td>1.500 €</td><td>4.000 €</td><td>10.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="ref-small">Todas as motas (garagem e Apps). Cada Clássica ignora 1 avaria. Carta apreendida: multas a dobrar. Habeas Corpus cancela a multa toda.</p>
+
+      <h3 class="section-title ref-title">Corrida Ilegal</h3>
+      <div class="table-scroll">
+        <table class="ref-table">
+          <thead><tr><th>Mota</th><th>Dados</th><th>Relanç.</th><th>Máx. vs Banco</th></tr></thead>
+          <tbody>
+            <tr><th>Normal</th><td>5</td><td>0</td><td>1.000 €</td></tr>
+            <tr><th>Rara</th><td>5</td><td>1</td><td>3.000 €</td></tr>
+            <tr><th>Épica</th><td>6</td><td>1</td><td>8.000 €</td></tr>
+            <tr><th>Lendária</th><td>6</td><td>2</td><td>20.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card ref-card">
+        <p><strong>Mãos:</strong> Carta Alta &lt; Par &lt; Dois Pares &lt; Trio &lt; Full House &lt; Sequência &lt; Quadra &lt; Poker.</p>
+        <p><strong>Empate:</strong> maior soma dos 5 dados; se igual, aposta anulada.</p>
+        <p><strong>Prémio:</strong> até Dois Pares → a aposta · Trio/Full → aposta + 1.000 € do Banco · Sequência/Quadra/Poker → o dobro (o Banco paga a outra metade).</p>
+        <p><strong>Contra o Banco:</strong> o Banco joga com os mesmos dados da mota do jogador. Contra jogadores: aposta igual, nunca acima do saldo de nenhum.</p>
+        <p><strong>Dado da Polícia</strong> (cada jogador, no fim): 1 → interceção · 2 → 1 avaria · 3–6 → nada. Disputa de vaga: só quem desafia.</p>
+      </div>
+
+      <h3 class="section-title ref-title">Polícia</h3>
+      <div class="card ref-card">
+        <p><strong>Entregar-se:</strong> motas das Apps voltam à garagem, 1 turno sem jogar, carta apreendida 2 turnos.</p>
+        <p><strong>Fugir:</strong> 4–6 escapa (+1 avaria Estética) · 1–3 igual a entregar-se e a mota fica apreendida (resgate 20%).</p>
+        <p><strong>Reincidência</strong> (sem carta): 2 turnos sem jogar, carta 4 turnos, resgate 40%, multas Stop a dobrar.</p>
+      </div>
+
+      <h3 class="section-title ref-title">Disputa de vaga nas Apps</h3>
+      <div class="card ref-card">
+        <p>Pagar ao dono <strong>10% do rendimento</strong> da mota na vaga, ou correr (só com mota sem Crítica na garagem). Quem desafia e perde paga os 10%. Quem desafia e ganha expulsa o dono.</p>
+      </div>
+
+      <h3 class="section-title ref-title">Falência</h3>
+      <div class="card ref-card">
+        <p>Vender ao Banco por <strong>50% do Preço de Aquisição</strong> (com desconto das avarias), ou Leilão de Falência com valor base = o <strong>maior</strong> entre a dívida e esse preço.</p>
       </div>
     </section>
 
@@ -136,6 +256,7 @@
         <h3 class="section-title">Histórico de transações</h3>
         <button id="undoBtn" type="button" class="btn btn-ghost btn-sm">↶ Anular última</button>
       </div>
+      <p class="hint">"Anular" repõe saldos. Para corrigir a garagem (motas, avarias, Apps), usa a ficha da mota.</p>
       <ul id="fullLog" class="log"></ul>
 
       <button id="resetBtn" type="button" class="btn btn-danger btn-xl">⟲ Reiniciar Jogo</button>
@@ -153,27 +274,162 @@
       <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
     </div>
 
-    <div class="balance-box">
-      <span class="balance-label">Saldo atual</span>
-      <strong id="pmBalance" class="balance-value">0 €</strong>
-      <span id="pmDelta" class="balance-delta"></span>
+    <div id="pmStatus" class="pm-status"></div>
+
+    <div class="sub-tabs" role="tablist">
+      <button type="button" class="sub-tab" data-pm-tab="money" aria-selected="true">💰 Saldo</button>
+      <button type="button" class="sub-tab" data-pm-tab="garage" aria-selected="false">🏍️ Garagem <span id="pmGarageCount"></span></button>
     </div>
 
-    <div id="pmQuick" class="quick-actions"></div>
+    <div id="pmPanelMoney">
+      <div class="balance-box">
+        <span class="balance-label">Saldo atual</span>
+        <strong id="pmBalance" class="balance-value">0 €</strong>
+        <span id="pmPatrimony" class="balance-sub"></span>
+        <span id="pmDelta" class="balance-delta"></span>
+      </div>
 
-    <div class="custom-amount">
-      <span class="field-label">Valor personalizado</span>
-      <span class="input-money input-lg">
-        <input id="pmAmount" type="text" inputmode="numeric" placeholder="0">
-        <span class="input-suffix">€</span>
-      </span>
-      <div id="pmChips" class="chips chips-fill"></div>
-      <input id="pmReason" class="input-plain" type="text" placeholder="Motivo (opcional) — ex: Compra de mota" maxlength="60">
-      <div class="btn-row">
-        <button id="pmSub" type="button" class="btn btn-minus btn-xl">− Subtrair</button>
-        <button id="pmAdd" type="button" class="btn btn-plus btn-xl">+ Adicionar</button>
+      <div class="tool-row">
+        <button type="button" class="btn" data-pm-tool="partida">🏁 Partida</button>
+        <button type="button" class="btn" data-pm-tool="stop">🚔 Op. Stop</button>
+        <button type="button" class="btn" data-pm-tool="race">🏎️ Corrida</button>
+      </div>
+
+      <span class="field-label">Cartas de Sorte / Azar</span>
+      <div id="pmQuick" class="quick-actions"></div>
+
+      <div class="custom-amount">
+        <span class="field-label">Valor personalizado</span>
+        <span class="input-money input-lg">
+          <input id="pmAmount" type="text" inputmode="numeric" placeholder="0">
+          <span class="input-suffix">€</span>
+        </span>
+        <div id="pmChips" class="chips chips-fill"></div>
+        <input id="pmReason" class="input-plain" type="text" placeholder="Motivo (opcional) — ex: Compra de mota" maxlength="60">
+        <div class="btn-row">
+          <button id="pmSub" type="button" class="btn btn-minus btn-xl">− Subtrair</button>
+          <button id="pmAdd" type="button" class="btn btn-plus btn-xl">+ Adicionar</button>
+        </div>
+        <button id="pmTransfer" type="button" class="btn btn-xl btn-transfer">⇄ Transferir para outro jogador</button>
       </div>
     </div>
+
+    <div id="pmPanelGarage" hidden>
+      <div class="garage-summary">
+        <div><span>Motas</span><strong id="gsCount">0</strong></div>
+        <div><span>Valor das motas</span><strong id="gsValue">0 €</strong></div>
+        <div><span>Património</span><strong id="gsPatrimony">0 €</strong></div>
+      </div>
+      <button id="pmAddMoto" type="button" class="btn btn-primary btn-xl">＋ Adicionar mota</button>
+      <ul id="pmGarage" class="moto-list garage-list"></ul>
+      <button id="pmEliminate" type="button" class="btn btn-danger btn-xl" hidden>☠️ Eliminar jogador (falência)</button>
+    </div>
+  </dialog>
+
+  <!-- ============ FICHA DA MOTA ============ -->
+  <dialog id="motoSheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2 id="msName"></h2>
+        <small id="msOwner"></small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="msBody"></div>
+  </dialog>
+
+  <!-- ============ PARTIDA ============ -->
+  <dialog id="partidaSheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2>🏁 Passou na Partida</h2>
+        <small id="ptPlayer"></small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="ptBody"></div>
+  </dialog>
+
+  <!-- ============ OPERAÇÃO STOP ============ -->
+  <dialog id="stopSheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2>🚔 Operação Stop</h2>
+        <small id="stPlayer"></small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="stBody"></div>
+  </dialog>
+
+  <!-- ============ CORRIDA ============ -->
+  <dialog id="raceSheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2 id="rcTitle">🏎️ Corrida Ilegal</h2>
+        <small id="rcSubtitle"></small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="rcBody"></div>
+  </dialog>
+
+  <!-- ============ ALOCAR NUMA APP ============ -->
+  <dialog id="allocSheet" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2>📱 Alocar mota numa App</h2>
+        <small>Escolhe a vaga, a mota e o resultado do dado do contrato</small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <div id="alBody"></div>
+  </dialog>
+
+  <!-- ============ TRANSFERÊNCIA ============ -->
+  <dialog id="transferModal" class="sheet">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2>⇄ Transferência</h2>
+        <small id="trSubtitle">Dinheiro de um jogador para outro</small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+
+    <div class="field">
+      <span class="field-label">Quem paga</span>
+      <div id="trFrom" class="chips chips-fill"></div>
+    </div>
+    <div class="field">
+      <span class="field-label">Quem recebe</span>
+      <div id="trTo" class="chips chips-fill"></div>
+    </div>
+
+    <div class="custom-amount">
+      <span class="field-label">Valor</span>
+      <span class="input-money input-lg">
+        <input id="trAmount" type="text" inputmode="numeric" placeholder="0">
+        <span class="input-suffix">€</span>
+      </span>
+      <div id="trChips" class="chips chips-fill"></div>
+      <div id="trReasons" class="chips"></div>
+      <input id="trReason" class="input-plain" type="text" placeholder="Motivo (opcional)" maxlength="60">
+      <p id="trSummary" class="tr-summary"></p>
+      <button id="trConfirm" type="button" class="btn btn-primary btn-xl">Confirmar transferência</button>
+    </div>
+  </dialog>
+
+  <!-- ============ ESCOLHER MOTA ============ -->
+  <dialog id="motoModal" class="sheet sheet-tall">
+    <div class="sheet-head">
+      <div class="sheet-head-text">
+        <h2>Escolher mota</h2>
+        <small>Escreve o número da carta ou parte do nome</small>
+      </div>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+    </div>
+    <input id="motoSearch" class="input-plain moto-search" type="search" placeholder="ex: 40 ou bimota" autocomplete="off" enterkeyhint="search">
+    <ul id="motoList" class="moto-list"></ul>
   </dialog>
 
   <!-- ============ SCANNER ============ -->
@@ -193,6 +449,14 @@
       <span class="field-label">Sem câmara? Escolhe o jogador manualmente:</span>
       <div id="scanManual" class="chips chips-fill"></div>
     </div>
+  </dialog>
+
+  <!-- ============ ESCOLHA ============ -->
+  <dialog id="choiceModal" class="sheet sheet-small">
+    <h2 id="choiceTitle" class="confirm-title"></h2>
+    <p id="choiceMsg" class="confirm-msg"></p>
+    <div id="choiceList" class="choice-list"></div>
+    <button type="button" class="btn btn-ghost btn-xl" data-close>Cancelar</button>
   </dialog>
 
   <!-- ============ CONFIRMAÇÃO ============ -->

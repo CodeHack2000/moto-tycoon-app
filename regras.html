@@ -1,0 +1,976 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Manual oficial de regras do jogo de tabuleiro MOTO TYCOON — STREET & GARAGE.">
+  <title>Manual Oficial de Regras — MOTO TYCOON (v2)</title>
+  <style>
+    :root {
+      --gold: #f1c40f;
+      --red: #e74c3c;
+      --graphite: #2c3e50;
+      --ink: #1a1a1a;
+      --paper: #fff;
+      --muted: #64717d;
+      --line: #d9dee3;
+      --soft-gold: #fff8d9;
+      --soft-red: #fff0ed;
+      --soft-blue: #edf4f8;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { background: #e9edf0; }
+
+    body {
+      max-width: 210mm;
+      margin: 82px auto 36px;
+      padding: 15mm 12mm 18mm;
+      color: var(--ink);
+      background: var(--paper);
+      box-shadow: 0 8px 36px #17212b24;
+      font: 10.2pt/1.48 Inter, "Segoe UI", Arial, sans-serif;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+
+    .screen-toolbar {
+      position: fixed;
+      z-index: 10;
+      inset: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 58px;
+      padding: 9px 16px;
+      color: #fff;
+      background: var(--ink);
+      box-shadow: 0 2px 12px #0003;
+    }
+
+    .print-button {
+      padding: 10px 18px;
+      border: 0;
+      border-radius: 6px;
+      color: var(--ink);
+      background: var(--gold);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .print-button:hover, .print-button:focus-visible { background: #ffda32; }
+    .print-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+    .cover {
+      position: relative;
+      overflow: hidden;
+      margin: -2mm 0 9mm;
+      padding: 13mm 12mm 12mm;
+      border-bottom: 5px solid var(--gold);
+      border-radius: 4px;
+      color: #fff;
+      background: linear-gradient(125deg, #111 0%, #1a1a1a 58%, #2c3e50 100%);
+    }
+
+    .cover::after {
+      position: absolute;
+      right: -18mm;
+      bottom: -32mm;
+      width: 76mm;
+      height: 76mm;
+      border: 10px solid #f1c40f24;
+      border-radius: 50%;
+      content: "";
+    }
+
+    .eyebrow {
+      margin: 0 0 3mm;
+      color: var(--gold);
+      font-size: 9pt;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+    }
+
+    h1 {
+      position: relative;
+      z-index: 1;
+      margin: 0;
+      color: var(--gold);
+      font-size: clamp(24pt, 5vw, 35pt);
+      line-height: 1.04;
+      letter-spacing: -.035em;
+      text-shadow: 0 0 16px #f1c40f45;
+    }
+
+    .cover-subtitle {
+      position: relative;
+      z-index: 1;
+      margin: 4mm 0 0;
+      color: #e6ebef;
+      font-size: 12pt;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    .cover-meta {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3mm 9mm;
+      margin: 8mm 0 0;
+      color: #d5dce2;
+      font-size: 9pt;
+    }
+
+    .cover-meta strong { color: var(--gold); }
+
+    h2 {
+      margin: 8mm 0 3mm;
+      padding: 0 0 2mm;
+      border-bottom: 2px solid var(--gold);
+      color: var(--graphite);
+      font-size: 16pt;
+      line-height: 1.2;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    h2 .section-number { color: var(--red); }
+
+    h3 {
+      margin: 5mm 0 2mm;
+      color: var(--graphite);
+      font-size: 11.5pt;
+      line-height: 1.25;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    h4 {
+      margin: 3mm 0 1mm;
+      color: var(--ink);
+      font-size: 10pt;
+      break-after: avoid;
+      page-break-after: avoid;
+    }
+
+    p { margin: 0 0 2.5mm; }
+    ul, ol { margin: 1mm 0 3mm; padding-left: 5.5mm; }
+    li { margin: 0 0 1.2mm; padding-left: .5mm; }
+    li > ul, li > ol { margin-bottom: 1mm; }
+    strong { color: #17212b; }
+
+    .dense {
+      column-count: 2;
+      column-gap: 8mm;
+      column-fill: balance;
+    }
+
+    .dense > h3, .dense > h4,
+    .dense > .callout, .dense > .rule-block, .dense > .table-wrap {
+      column-span: all;
+    }
+
+    .rule-block, .callout, .table-wrap, .board, .summary-box {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .callout {
+      margin: 3mm 0;
+      padding: 3mm 4mm;
+      border-left: 4px solid var(--gold);
+      border-radius: 0 4px 4px 0;
+      background: var(--soft-gold);
+    }
+
+    .callout.warning {
+      border-left-color: var(--red);
+      background: var(--soft-red);
+    }
+
+    .callout.info {
+      border-left-color: var(--graphite);
+      background: var(--soft-blue);
+    }
+
+    .callout p:last-child, .rule-block > :last-child { margin-bottom: 0; }
+    .callout strong { color: var(--graphite); }
+
+    .table-wrap {
+      width: 100%;
+      margin: 3mm 0 5mm;
+      overflow: visible;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    table {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 6px;
+      overflow: hidden;
+      font-size: 9pt;
+      line-height: 1.35;
+    }
+
+    thead { display: table-header-group; }
+    th {
+      padding: 2.3mm 2.5mm;
+      color: #fff;
+      background: var(--graphite);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    td {
+      padding: 2mm 2.5mm;
+      border-top: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    tbody tr:nth-child(even) { background: #f1f4f6; }
+    tbody tr:nth-child(odd) { background: #fff; }
+    td:first-child { font-weight: 700; }
+    .nowrap { white-space: nowrap; }
+
+    .hand-table th:first-child,
+    .hand-table td:first-child { width: 15%; }
+    .hand-table th:last-child,
+    .hand-table td:last-child { width: 38%; }
+    .hand-rank { white-space: nowrap; }
+    .dice-example {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 1.2mm;
+      align-items: center;
+      min-width: max-content;
+    }
+    .die {
+      display: block;
+      flex: 0 0 8mm;
+      width: 8mm;
+      height: 8mm;
+    }
+    .dice-definitions {
+      position: absolute;
+      width: 0;
+      height: 0;
+      overflow: hidden;
+    }
+
+    .board {
+      margin: 3mm auto 5mm;
+      padding: 5mm;
+      border: 1px solid #cbd4dc;
+      border-radius: 7px;
+      background: linear-gradient(145deg, #f8fafb, #edf2f5);
+    }
+
+    .board-title {
+      margin: 0 0 3mm;
+      color: var(--graphite);
+      font-size: 10pt;
+      font-weight: 800;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    .board ol {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1.5mm;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      counter-reset: board;
+    }
+
+    .board li {
+      display: flex;
+      align-items: center;
+      min-height: 9mm;
+      margin: 0;
+      padding: 1.5mm 2mm;
+      border: 1px solid #dbe1e6;
+      border-radius: 3px;
+      background: #fff;
+      font-size: 8.3pt;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+
+    .board li::before {
+      flex: 0 0 7mm;
+      color: var(--red);
+      font-size: 7.5pt;
+      font-weight: 800;
+      counter-increment: board;
+      content: "[" counter(board, decimal-leading-zero) "]";
+    }
+
+    .board li:first-child, .board li:nth-child(4n + 2) { border-left: 3px solid var(--gold); }
+    .board li:nth-child(4n + 4) { border-left: 3px solid var(--red); }
+    .board li:nth-child(4n + 3) { border-left: 3px solid var(--graphite); }
+
+    .summary-box {
+      padding: 4mm 5mm;
+      border: 1px solid #e3c217;
+      border-radius: 5px;
+      background: var(--soft-gold);
+    }
+
+    .summary-box ul { margin-bottom: 0; }
+
+    .manual-footer {
+      margin-top: 9mm;
+      padding-top: 3mm;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 8pt;
+      text-align: center;
+    }
+
+    @page {
+      size: A4 portrait;
+      margin: 15mm 12mm;
+      @bottom-center {
+        color: #64717d;
+        font: 8pt "Segoe UI", Arial, sans-serif;
+        content: "MOTO TYCOON — STREET & GARAGE  •  Página " counter(page);
+      }
+    }
+
+    @media print {
+      html { background: #fff; }
+      body {
+        width: auto;
+        max-width: none;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+        font-size: 9.4pt;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .screen-toolbar { display: none !important; }
+      .cover { margin-top: 0; }
+      .section { break-inside: auto; }
+      a { color: inherit; text-decoration: none; }
+      .manual-footer { display: none; }
+      .table-wrap { break-inside: avoid; page-break-inside: avoid; }
+      tr, .rule-block, .callout, .board, .summary-box {
+        break-inside: avoid;
+        page-break-inside: avoid;
+      }
+      h2, h3, h4 { break-after: avoid; page-break-after: avoid; }
+    }
+
+    @media screen and (max-width: 700px) {
+      body { margin: 72px 12px 20px; padding: 22px 18px 30px; }
+      .cover { margin: 0 0 28px; padding: 30px 22px 24px; }
+      h1 { font-size: 27pt; }
+      .dense { column-count: 1; }
+      .board ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .table-wrap { overflow-x: auto; }
+      table { min-width: 580px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="screen-toolbar" aria-label="Ferramentas do manual">
+    <button class="print-button" type="button" onclick="window.print()">🖨️ Imprimir Manual de Regras</button>
+  </nav>
+
+  <header class="cover">
+    <p class="eyebrow">Manual oficial de regras · Versão 2</p>
+    <h1>MOTO TYCOON</h1>
+    <p class="cover-subtitle">Street &amp; Garage</p>
+    <div class="cover-meta">
+      <span><strong>Género:</strong> estratégia, corridas e gestão de garagem</span>
+      <span><strong>Tabuleiro:</strong> circuito de 28 casas</span>
+      <span><strong>Jogadores:</strong> 2 a 4</span>
+      <span><strong>Idade:</strong> sem limite</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="section" aria-labelledby="componentes">
+      <h2 id="componentes"><span class="section-number">01.</span> Componentes do jogo</h2>
+      <div class="dense">
+        <ul>
+          <li><strong>1 Tabuleiro:</strong> circuito de 28 casas (42x42 cm, montado em grelha 2x2 folhas A4 sobre cartão rígido).</li>
+          <li><strong>2 Dados de Movimento:</strong> usados para navegar pelo tabuleiro. Um deles serve também de <strong>Dado da Polícia</strong> e de dado de contrato das Apps.</li>
+          <li><strong>6 Dados de Ação:</strong> usados nas corridas ilegais, reparações manuais e leilões (5 dados na maioria das jogadas; 6 para motas Épicas e Lendárias).</li>
+          <li><strong>Baralho de Cartas de Motas (44 cartas):</strong> 12 Normais, 12 Raras, 10 Épicas e 10 Lendárias. Destas, 16 são <strong>Clássicas</strong> (4 de cada raridade).</li>
+          <li><strong>Baralho de Cartas de Avarias (45 cartas):</strong> 20 Estéticas (Laranja), 15 Moderadas (Amarela) e 10 Críticas (Vermelha).</li>
+          <li><strong>Baralho de Cartas de Eventos (36 cartas):</strong> 18 de Sorte e 18 de Azar.</li>
+          <li><strong>Bloco do Banqueiro (opcional):</strong> usado para registar património e saldos quando se joga sem a aplicação.</li>
+          <li><strong>Cartões bancários dos jogadores (para usar a aplicação):</strong> cada jogador recebe um cartão com o seu QR Code para identificação na aplicação do banqueiro.</li>
+          <li><strong>4 Peões / Marcadores de Jogador.</strong></li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="preparacao">
+      <h2 id="preparacao"><span class="section-number">02.</span> Preparação do jogo e economia inicial</h2>
+      <div class="dense">
+        <ol>
+          <li><strong>Escolha do método de gestão da banca</strong>
+            <ul>
+              <li>A gestão pode ser feita manualmente, com um jogador responsável pelo Bloco do Banqueiro, ou através da <a href="https://codehack2000.github.io/moto-tycoon-app/">aplicação web do banqueiro</a>.</li>
+              <li>Na aplicação, o banqueiro pode ler o QR Code do cartão bancário de cada jogador para aceder à respetiva conta e gerir o seu dinheiro. Se não conseguir ler o QR Code, pode selecionar o jogador manualmente.</li>
+              <li>A aplicação inclui também um simulador de vendas que ajuda a calcular o preço de venda das motas de acordo com as regras do leilão.</li>
+            </ul>
+          </li>
+          <li><strong>Saldo Inicial</strong>
+            <ul>
+              <li>Cada jogador começa com <strong>7.500 €</strong>, registados no Bloco do Banqueiro ou na respetiva conta da aplicação, conforme o método escolhido.</li>
+            </ul>
+          </li>
+          <li><strong>Mota Inicial (Garagem de Arranque)</strong>
+            <ul>
+              <li>Antes do primeiro movimento, cada jogador retira 1 mota <strong>Normal</strong> aleatória do baralho para a sua garagem.</li>
+              <li>De seguida, retira obrigatoriamente <strong>1 carta de avaria</strong> do baralho de avarias e coloca-a sob a sua mota inicial.</li>
+              <li><strong>Risco de arranque:</strong>
+                <ul>
+                  <li>Se sair uma avaria <strong>Estética (Laranja)</strong> ou <strong>Moderada (Amarela)</strong>, a mota fica com essa avaria e pode começar logo a trabalhar nas casas de aplicações.</li>
+                  <li>Se sair uma avaria <strong>Crítica (Vermelha)</strong>, essa carta volta para o <strong>fundo do baralho</strong> e o jogador tira outra, até sair uma avaria que não seja Crítica. Nenhum jogador começa com a mota parada.</li>
+                </ul>
+              </li>
+            </ul>
+          </li>
+          <li><strong>Definição da Condição de Vitória (Escolher 1 modo antes de começar)</strong>
+            <ul>
+              <li><strong>Modo Império das Frotas (Acumulação de Património):</strong>
+                <ul>
+                  <li><em>Nível Rápido / Iniciante:</em> primeiro a atingir <strong>100.000 €</strong> em Património Líquido.</li>
+                  <li><em>Nível Padrão / Competitivo:</em> primeiro a atingir <strong>200.000 €</strong> em Património Líquido.</li>
+                  <li><em>Nível Longo / Magnata:</em> primeiro a atingir <strong>400.000 €</strong> em Património Líquido.</li>
+                </ul>
+              </li>
+              <li><strong>Modo Mestre do Restauro:</strong> primeiro jogador a comprar, restaurar a 100% (zero avarias) e vender no <strong>Leilão</strong> 1 mota <strong>Clássica Lendária</strong>. A mota pode ter sido comprada na Sucata, na Feira ou a outro jogador.</li>
+              <li><strong>Modo Cronómetro (45 min):</strong> quando os 45 minutos terminarem, não começam novas rondas: termina-se a ronda em curso, para que todos tenham jogado o mesmo número de turnos. Vence o jogador com maior Património Líquido.</li>
+            </ul>
+          </li>
+          <li><strong>Organização da Mesa</strong>
+            <ul>
+              <li>Baralhar e colocar nos locais reservados do tabuleiro os três baralhos de cartas (Motas, Avarias e Eventos).</li>
+              <li>Cada jogador lança os 2 dados de movimento; começa quem tirar o valor mais alto. Joga-se no sentido dos ponteiros do relógio.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="turno">
+      <h2 id="turno"><span class="section-number">03.</span> Estrutura do turno</h2>
+      <ol>
+        <li><strong>Lançar</strong> os 2 dados de movimento.</li>
+        <li><strong>Mover</strong> o peão no sentido dos ponteiros do relógio. Se passar ou parar na <strong>PARTIDA (01)</strong>, recebe o pagamento da volta.</li>
+        <li><strong>Reagir à casa</strong> onde o peão parou e realizar a ação dessa casa, se o jogador quiser ou se for obrigatória.</li>
+        <li><strong>Duplos:</strong> se os 2 dados mostrarem o mesmo número (ex.: 3-3, 5-5), o jogador tira <strong>1 carta de Sorte/Azar</strong> depois de resolver a casa. Os duplos <strong>não</strong> dão outra jogada.</li>
+        <li>O turno passa ao jogador seguinte.</li>
+      </ol>
+      <aside class="callout info">
+        <p><strong>Negociação entre jogadores:</strong> só é permitida nas casas <strong>LEILÃO</strong> ou num <strong>Leilão de Falência</strong>. Fora destes casos, os jogadores não podem trocar motas, dinheiro ou cartas entre si.</p>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="tabuleiro">
+      <h2 id="tabuleiro"><span class="section-number">04.</span> O tabuleiro e as suas casas (28 casas)</h2>
+      <p>O circuito do tabuleiro é percorrido no sentido dos ponteiros do relógio.</p>
+      <div class="board" role="group" aria-label="Layout do tabuleiro com 28 casas">
+        <p class="board-title">Layout do Tabuleiro (28 Casas)</p>
+        <ol>
+          <li>PARTIDA</li><li>SUCATA</li><li>UBER EATS</li><li>OPERAÇÃO STOP</li>
+          <li>OFICINA</li><li>CORRIDA ILEGAL</li><li>GLOVO</li><li>GARAGEM DO AMIGO</li>
+          <li>SORTE / AZAR</li><li>TVDE</li><li>LEILÃO</li><li>OFICINA</li>
+          <li>CORRIDA ILEGAL</li><li>SUCATA</li><li>POLÍCIA</li><li>OPERAÇÃO STOP</li>
+          <li>UBER EATS</li><li>SORTE / AZAR</li><li>GLOVO</li><li>OFICINA</li>
+          <li>SUCATA</li><li>FEIRA DAS MOTAS</li><li>TVDE</li><li>CORRIDA ILEGAL</li>
+          <li>LEILÃO</li><li>SORTE / AZAR</li><li>SUCATA</li><li>OFICINA</li>
+        </ol>
+      </div>
+
+      <h3>Funcionamento das Casas Especializadas</h3>
+
+      <div class="rule-block callout">
+        <h4>PARTIDA (01)</h4>
+        <p>Sempre que um jogador passa ou para na Partida, recebe do Banco:</p>
+        <ol>
+          <li><strong>1.000 €</strong> de subvenção de manutenção;</li>
+          <li><strong>10% do rendimento nas Apps de cada mota que possui</strong> (na garagem ou nas Apps), calculado com o valor indicado na carta <strong>já com o desconto das avarias</strong>. Uma mota com avaria Crítica dá 0 €;</li>
+          <li>o <strong>rendimento das motas que estão a trabalhar nas Apps</strong> (já com o desconto das avarias);</li>
+          <li>o bónus de <strong>Valorização de Garagem</strong> de cada mota Clássica (secção 09).</li>
+        </ol>
+        <p>Os pontos 1, 2 e 4 formam o <strong>valor base da volta</strong>. O ponto 3 é o <strong>rendimento das Apps</strong>.</p>
+        <p><em>Exemplo:</em> um jogador tem uma Honda PCX na garagem (600 €) e uma Bimota KB4 numa App (8.500 €) com uma avaria Moderada. Recebe 1.000 € + 60 € + 425 € + 4.250 € = <strong>5.735 €</strong>.</p>
+      </div>
+
+      <div class="dense">
+        <div class="rule-block">
+          <h4>SUCATA (02, 14, 21, 27)</h4>
+          <p>Permite revelar a carta do topo do baralho de motas e comprá-la pelo seu <strong>Preço de Aquisição</strong>. <strong>Regra do Salvado:</strong> sempre que uma mota é comprada na Sucata, o jogador é obrigado a tirar imediatamente <strong>2 cartas de avaria</strong> do topo do baralho e colocá-las sob a nova mota. Se não comprar, a carta vai para o <strong>fundo do baralho</strong> de motas.</p>
+        </div>
+        <div class="rule-block">
+          <h4>FEIRA DAS MOTAS (22)</h4>
+          <p>Revelam-se as <strong>3 cartas do topo do Baralho de Motas</strong> e as <strong>2 cartas do topo do Baralho de Avarias</strong>. As 2 avarias aplicam-se à mota que o jogador escolher, seja ela qual for. O jogador pode comprar <strong>1</strong> das motas pelo Preço de Aquisição, ou não comprar nenhuma. As motas não compradas voltam para o fundo do baralho; se não comprar nenhuma, as 2 avarias também voltam para o fundo do seu baralho.</p>
+        </div>
+        <div class="rule-block">
+          <h4>GARAGEM DO AMIGO (08)</h4>
+          <p>Estacionamento grátis! O jogador escolhe <strong>1 das suas motas</strong> e <strong>1 avaria de qualquer tipo</strong> dessa mota, e repara-a a <strong>0 €</strong> instantaneamente. A carta de avaria volta para o fundo do baralho.</p>
+        </div>
+        <div class="rule-block">
+          <h4>CORRIDA ILEGAL (06, 13, 24)</h4>
+          <p>O jogador pode desafiar outro jogador ou o Banco para uma corrida com apostas em dinheiro (secção 07-A).</p>
+        </div>
+        <div class="rule-block">
+          <h4>OFICINA (05, 12, 20, 28)</h4>
+          <p>O jogador escolhe <strong>uma</strong> das opções: pagar ao Banco o custo de reparação das avarias que quiser remover (secção 06), <strong>ou</strong> tentar a <strong>Reparação Manual dos 5 Dados</strong> (gratuita, secção 07-C). As cartas <em>Vale de Reparação Grátis</em> e <em>Mecânico Amigo da Garagem</em> usam-se aqui.</p>
+        </div>
+        <div class="rule-block">
+          <h4>LEILÃO (11, 25)</h4>
+          <p>O jogador pode vender motas da sua garagem (secção 07-D). As cartas de evento <code>GUARDAR NA MÃO</code> também só podem ser vendidas a outros jogadores no Leilão.</p>
+        </div>
+        <div class="rule-block">
+          <h4>POLÍCIA (15)</h4>
+          <p><strong>Parar nesta casa com um movimento normal conta apenas como visita.</strong> É para aqui que o peão vai quando o jogador é intercetado (secção 07-B). Se tiver uma mota apreendida, pode resgatá-la ao sair da prisão ou quando voltar a parar exatamente nesta casa, pagando o valor de resgate.</p>
+        </div>
+        <div class="rule-block">
+          <h4>SORTE / AZAR (09, 18, 26)</h4>
+          <p>O jogador tira 1 carta do baralho de Eventos (secção 08).</p>
+        </div>
+      </div>
+
+      <div class="rule-block">
+        <h4>OPERAÇÃO STOP (04, 16)</h4>
+        <p>Fiscalização policial. O jogador paga uma multa por <strong>cada avaria não reparada em todas as suas motas</strong> (na garagem e nas Apps). A multa de cada avaria é <strong>50% do seu custo de reparação</strong>:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Raridade da Mota</th><th>Avaria Estética</th><th>Avaria Moderada</th><th>Avaria Crítica</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Normal</strong></td><td>75 €</td><td>200 €</td><td>500 €</td></tr>
+              <tr><td><strong>Rara</strong></td><td>200 €</td><td>500 €</td><td>1.250 €</td></tr>
+              <tr><td><strong>Épica</strong></td><td>500 €</td><td>1.250 €</td><td>3.000 €</td></tr>
+              <tr><td><strong>Lendária</strong></td><td>1.500 €</td><td>4.000 €</td><td>10.000 €</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul>
+          <li>Cada mota Clássica ignora 1 das suas avarias (<em>Nostalgia Policial</em>, secção 09).</li>
+          <li>Se o jogador tiver a <strong>Carta de Condução apreendida</strong>, as multas <strong>duplicam</strong> (Reincidência, secção 07-B).</li>
+          <li>A carta <em>Advogado Especialista / Habeas Corpus</em> cancela a multa toda da Operação Stop.</li>
+        </ul>
+      </div>
+
+      <h3>Casas de Aplicações (UBER EATS 03 e 17, GLOVO 07 e 19, TVDE 10 e 23)</h3>
+      <div class="dense">
+        <ul>
+          <li><strong>Exclusividade:</strong> cada casa de aplicação só pode ter <strong>1 mota alocada no total</strong>.</li>
+          <li><strong>Alocação:</strong> se calhares numa casa de aplicação e a vaga estiver livre, podes alocar 1 mota da tua garagem sem avarias Críticas. A carta da mota fica colocada sobre essa casa. É preciso ter a Carta de Condução válida (não apreendida).</li>
+          <li><strong>Duração do contrato:</strong> ao alocar a mota, o jogador lança <strong>1 dado</strong>. O resultado (1 a 6) determina quantas voltas a mota pode trabalhar nessa App. Coloca-se um dado ou marcador com esse número sobre a carta da mota.</li>
+          <li><strong>Rendimento e contador:</strong> sempre que o jogador passa ou para na <strong>PARTIDA</strong>, recebe o rendimento da mota (afetado por eventuais avarias) e reduz o contador do contrato em 1.</li>
+          <li><strong>Fim do contrato:</strong> quando o contador chega a 0, a mota regressa imediatamente à garagem, depois de receber o pagamento dessa última volta, libertando a vaga.</li>
+          <li><strong>O dono na sua própria vaga:</strong> se o dono parar na App onde a sua mota está a trabalhar, nada acontece. A mota continua a trabalhar.</li>
+          <li><strong>Saída antecipada:</strong> uma mota só sai da App antes do fim do contrato se o dono for intercetado pela Polícia, se a mota receber uma avaria Crítica (volta logo para a garagem), se perder uma Disputa de Vaga, ou por efeito de uma carta de evento.</li>
+          <li><strong>Interceção Policial:</strong> ao entregar-se ou falhar uma fuga, todas as motas do jogador nas Apps regressam imediatamente à garagem antes de o peão se deslocar para a Polícia. Os contratos terminam e as vagas ficam livres.</li>
+        </ul>
+      </div>
+
+      <aside class="callout">
+        <strong>⚔️ Disputa de Vaga (App ocupada por outro jogador)</strong>
+        <p>Se parares numa App ocupada pela mota de outro jogador, tens duas opções:</p>
+        <ol>
+          <li><strong>Pagar a taxa:</strong> pagas ao dono da vaga <strong>10% do rendimento</strong> da mota que lá está a trabalhar (já com o desconto das avarias). Não há corrida.</li>
+          <li><strong>Desafiar para uma corrida:</strong> só é possível se tiveres na tua garagem uma mota <strong>sem avaria Crítica</strong>. Caso contrário, és obrigado a pagar a taxa.</li>
+        </ol>
+        <p>A corrida de disputa usa as regras da Corrida Ilegal (dados, relançamentos, hierarquia e desempate), mas <strong>sem apostas em dinheiro</strong>. O dono corre com a mota que está na vaga.</p>
+        <ul>
+          <li><strong>Se quem desafia perder:</strong> paga ao dono os <strong>10% do rendimento</strong> da mota que está na vaga. O dono mantém a vaga.</li>
+          <li><strong>Se quem desafia ganhar:</strong> a mota do dono é <strong>sempre expulsa</strong> e volta para a garagem (o contrato termina). Quem desafiou escolhe se quer deixar a sua mota na vaga; se quiser, lança o dado para definir o seu contrato. Se tiver a Carta de Condução apreendida, expulsa o dono mas não pode ocupar a vaga.</li>
+          <li><strong>Empate total:</strong> a disputa é anulada. Ninguém paga e o dono mantém a vaga.</li>
+          <li><strong>Dado da Polícia:</strong> no fim da disputa, <strong>só quem desafiou</strong> lança o Dado da Polícia.</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section class="section" aria-labelledby="raridades">
+      <h2 id="raridades"><span class="section-number">05.</span> Catálogo de raridades e bónus</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Raridade</th><th>Preço de aquisição</th><th>Rendimento Apps / volta</th><th>Dados em corridas</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Normal</strong></td><td>2.000 € – 3.200 €</td><td>400 € – 650 €</td><td>5 Dados (sem relançamento)</td></tr>
+            <tr><td><strong>Rara</strong></td><td>6.500 € – 9.000 €</td><td>1.500 € – 2.100 €</td><td>5 Dados (1 Relançamento)</td></tr>
+            <tr><td><strong>Épica</strong></td><td>17.000 € – 22.000 €</td><td>4.000 € – 5.200 €</td><td>6 Dados (1 Relançamento)</td></tr>
+            <tr><td><strong>Lendária</strong></td><td>45.000 € – 85.000 €</td><td>8.500 € – 12.000 €</td><td><strong>6 Dados (2 Relançamentos)</strong> ⚠️ ver Errata</td></tr>
+            <tr><td><strong>Clássica (Especial)</strong></td><td>Segundo a raridade base</td><td>+20% de rendimento nas Apps + bónus na Partida</td><td>Dados segundo a raridade base</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <ul>
+        <li><strong>Preço de Aquisição:</strong> valor pago ao comprar a mota e valor usado no <strong>Património Líquido</strong>.</li>
+        <li><strong>Valor de Venda:</strong> usado <strong>apenas no Leilão</strong> (secção 07-D).</li>
+        <li>Com 6 dados, contam os <strong>5 melhores</strong> para formar a mão.</li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="avarias">
+      <h2 id="avarias"><span class="section-number">06.</span> Sistema de avarias e reparações</h2>
+      <p>As motas recebem cartas de avaria, colocadas sob a sua carta, quando são compradas (Sucata ou Feira), no Dado da Polícia, numa fuga bem-sucedida e por cartas de Azar.</p>
+      <div class="dense">
+        <h3>Limite Obrigatório</h3>
+        <ul>
+          <li>Cada mota pode ter <strong>no máximo 2 cartas de avaria</strong> em simultâneo.</li>
+          <li>Se uma mota que já tem 2 avarias receber uma nova avaria <strong>mais grave</strong> do que a sua avaria mais leve, essa avaria mais leve vai para o fundo do baralho e é <strong>substituída</strong> pela nova. Caso contrário, a nova avaria vai para o fundo do baralho.</li>
+          <li>A gravidade é: Estética &lt; Moderada &lt; Crítica.</li>
+        </ul>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Raridade da Mota</th><th>Avaria Estética (Laranja)</th><th>Avaria Moderada (Amarela)</th><th>Avaria Crítica (Vermelha)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Normal</strong></td><td>150 €</td><td>400 €</td><td>1.000 €</td></tr>
+            <tr><td><strong>Rara</strong></td><td>400 €</td><td>1.000 €</td><td>2.500 €</td></tr>
+            <tr><td><strong>Épica</strong></td><td>1.000 €</td><td>2.500 €</td><td>6.000 €</td></tr>
+            <tr><td><strong>Lendária</strong></td><td>3.000 €</td><td>8.000 €</td><td>20.000 €</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="dense">
+        <h3>Efeitos das Avarias</h3>
+        <ul>
+          <li><strong>Avaria Estética (Laranja):</strong> desconta <strong>10%</strong> no valor de venda/património. Rendimento nas Apps mantém-se a <strong>100%</strong>.</li>
+          <li><strong>Avaria Moderada (Amarela):</strong> desconta <strong>25%</strong> no valor de venda/património. Reduz o rendimento nas Apps em <strong>50%</strong>.</li>
+          <li><strong>Avaria Crítica (Vermelha):</strong> desconta <strong>50%</strong> no valor de venda/património. <strong>Mota parada!</strong> Gera <strong>0 €</strong> nas Apps, não pode ir a corridas nem ser alocada. Se estiver numa App, volta imediatamente para a garagem.</li>
+        </ul>
+        <h3>Acumulação de Avarias</h3>
+        <ul>
+          <li>Os descontos das avarias <strong>somam-se</strong>.</li>
+          <li><em>2 Moderadas:</em> −50% no valor e −100% no rendimento (gera 0 € nas Apps, mas ainda pode correr).</li>
+          <li><em>1 Estética + 1 Moderada:</em> −35% no valor e −50% no rendimento.</li>
+          <li><em>2 Críticas:</em> −100% no valor (a mota vale 0 €).</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="minijogos">
+      <h2 id="minijogos"><span class="section-number">07.</span> Minijogos de ação (Sistema dos Dados)</h2>
+
+      <h3>A) Corridas Ilegais (Poker de Dados)</h3>
+      <ol>
+        <li><strong>Desafio:</strong>
+          <ul>
+            <li>O jogador que parou na Corrida Ilegal escolhe uma mota funcional (sem avaria Crítica) e desafia <strong>outro jogador</strong> ou o <strong>Banco</strong>.</li>
+            <li>O jogador desafiado <strong>pode recusar</strong>. Nesse caso, quem desafiou pode desafiar o Banco.</li>
+            <li>O jogador desafiado escolhe a mota funcional com que vai correr.</li>
+          </ul>
+        </li>
+        <li><strong>Aposta:</strong>
+          <ul>
+            <li>As apostas são <strong>apenas em dinheiro</strong> (nunca motas nem cartas).</li>
+            <li><strong>Contra outro jogador:</strong> a aposta é igual para os dois e <strong>nunca pode ultrapassar o saldo</strong> de nenhum dos jogadores.</li>
+            <li><strong>Contra o Banco:</strong> a aposta máxima depende da raridade da mota de quem desafia, e nunca pode ultrapassar o seu saldo. <strong>O Banco joga com o mesmo número de dados e relançamentos</strong> da mota do jogador.</li>
+          </ul>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Mota do jogador</th><th>Normal</th><th>Rara</th><th>Épica</th><th>Lendária</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>Aposta máxima contra o Banco</td><td>1.000 €</td><td>3.000 €</td><td>8.000 €</td><td>20.000 €</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </li>
+        <li><strong>Lançamentos:</strong>
+          <ul>
+            <li>Cada jogador lança os dados de acordo com a raridade da sua mota (secção 05).</li>
+            <li>Guarda os bons valores e relança os restantes, conforme os relançamentos permitidos.</li>
+            <li>Com 6 dados, a mão é formada pelos <strong>5 melhores dados</strong>.</li>
+          </ul>
+        </li>
+        <li><strong>Hierarquia de Mão:</strong>
+          <p>A tabela apresenta as mãos por ordem crescente de força. Os exemplos mostram cinco dados.</p>
+          <svg class="dice-definitions" aria-hidden="true" focusable="false">
+            <symbol id="die-face-1" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="20" cy="20" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+            <symbol id="die-face-2" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="11" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="29" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+            <symbol id="die-face-3" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="11" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="20" cy="20" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="29" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+            <symbol id="die-face-4" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="11" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="11" cy="29" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="29" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+            <symbol id="die-face-5" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="11" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="11" r="3.5" fill="#1a1a1a"/><circle cx="20" cy="20" r="3.5" fill="#1a1a1a"/><circle cx="11" cy="29" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="29" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+            <symbol id="die-face-6" viewBox="0 0 40 40">
+              <rect x="1" y="1" width="38" height="38" rx="7" fill="#fff" stroke="#2c3e50" stroke-width="2"/>
+              <circle cx="11" cy="10" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="10" r="3.5" fill="#1a1a1a"/><circle cx="11" cy="20" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="20" r="3.5" fill="#1a1a1a"/><circle cx="11" cy="30" r="3.5" fill="#1a1a1a"/><circle cx="29" cy="30" r="3.5" fill="#1a1a1a"/>
+            </symbol>
+          </svg>
+          <div class="table-wrap">
+            <table class="hand-table">
+              <thead>
+                <tr>
+                  <th scope="col">Força</th>
+                  <th scope="col">Mão</th>
+                  <th scope="col">Exemplo (5 dados)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="hand-rank">1 — mais fraca</td>
+                  <td>Carta Alta / Sem Par</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 1, 2, 3, 4 e 6">
+                    <svg class="die" role="img" aria-label="1"><use href="#die-face-1"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">2</td>
+                  <td>Par</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 2, 2, 3, 4 e 6">
+                    <svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">3</td>
+                  <td>Dois Pares</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 2, 2, 5, 5 e 6">
+                    <svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">4</td>
+                  <td>Trio</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 3, 3, 3, 1 e 6">
+                    <svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="1"><use href="#die-face-1"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">5</td>
+                  <td>Full House</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 4, 4, 4, 2 e 2">
+                    <svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">6</td>
+                  <td>Sequência (1-2-3-4-5 ou 2-3-4-5-6)</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 1, 2, 3, 4 e 5">
+                    <svg class="die" role="img" aria-label="1"><use href="#die-face-1"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg><svg class="die" role="img" aria-label="3"><use href="#die-face-3"/></svg><svg class="die" role="img" aria-label="4"><use href="#die-face-4"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">7</td>
+                  <td>Quadra (4 iguais)</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 5, 5, 5, 5 e 2">
+                    <svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="5"><use href="#die-face-5"/></svg><svg class="die" role="img" aria-label="2"><use href="#die-face-2"/></svg>
+                  </div></td>
+                </tr>
+                <tr>
+                  <td class="hand-rank">8 — mais forte</td>
+                  <td>Poker / General (5 iguais)</td>
+                  <td><div class="dice-example" role="group" aria-label="Exemplo: 6, 6, 6, 6 e 6">
+                    <svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg><svg class="die" role="img" aria-label="6"><use href="#die-face-6"/></svg>
+                  </div></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </li>
+        <li><strong>Desempate:</strong> se os dois tiverem a mesma mão, ganha quem tiver a <strong>maior soma</strong> dos 5 dados que formam a mão. Se a soma também for igual, a <strong>aposta é anulada</strong> e ninguém paga.</li>
+        <li><strong>Recompensas:</strong>
+          <ul>
+            <li><em>Vitória com Carta Alta, Par ou Dois Pares:</em> o vencedor ganha o valor da aposta (o perdedor paga-lhe a aposta).</li>
+            <li><em>Vitória com Trio ou Full House:</em> o vencedor ganha a aposta + <strong>1.000 € de bónus do Banco</strong>.</li>
+            <li><em>Vitória com Sequência, Quadra ou Poker:</em> o vencedor ganha <strong>o dobro do valor da aposta</strong>: o perdedor paga a aposta e o Banco paga outro tanto.</li>
+            <li><em>Se o Banco ganhar:</em> recebe o valor apostado pelo jogador.</li>
+            <li>A aposta é paga <strong>antes</strong> do Dado da Polícia.</li>
+          </ul>
+        </li>
+        <li><strong>Dado da Polícia:</strong> no fim de cada corrida, <strong>cada jogador</strong> que correu (o Banco não lança) lança <strong>1 dado</strong>. Na Disputa de Vaga só lança quem desafiou.
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Resultado</th><th>Efeito</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>1</td><td>🚨 <strong>Interceção Policial</strong> (ver abaixo)</td></tr>
+                <tr><td>2</td><td>💥 <strong>Acidente:</strong> a mota com que correu recebe 1 avaria tirada do topo do baralho</td></tr>
+                <tr><td>3 – 6</td><td>Nada acontece</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </li>
+      </ol>
+
+      <aside class="callout warning">
+        <strong>🚨 B) Regra Especial: Interceção Policial</strong>
+        <p><strong>Gatilho de ativação:</strong> sair <strong>1</strong> no Dado da Polícia. Quando ocorre a interceção, o jogador tem de escolher uma das duas opções seguintes <strong>antes de qualquer outra ação</strong>.</p>
+        <h4>1. Entregar-se (Via Legal)</h4>
+        <ul>
+          <li><strong>Recolha imediata da frota:</strong> antes de mover o peão, todas as motas do jogador alocadas em casas de Apps são imediatamente retiradas do tabuleiro e devolvidas à sua garagem.</li>
+          <li><strong>Deslocação para a prisão:</strong> o peão vai para a casa <strong>POLÍCIA (15)</strong> e o jogador fica <strong>1 turno completo sem jogar</strong>: não lança dados, não se move nem realiza ações.</li>
+          <li><strong>Passagem pela Partida:</strong> se o trajeto direto até à Polícia passar pela Partida, o jogador recebe o <strong>valor base da volta</strong>, <strong>sem o rendimento das Apps</strong>, pois as motas já foram recolhidas.</li>
+          <li><strong>Carta de Condução apreendida:</strong> fica apreendida durante <strong>2 turnos</strong>, contados apenas após a saída da prisão.</li>
+          <li><strong>Bloqueio de Apps:</strong> durante esses 2 turnos em liberdade, o jogador não pode colocar motas em casas de Apps.</li>
+          <li><strong>Rendimento de voltas:</strong> durante esses 2 turnos, o jogador continua a receber o valor base da volta sempre que passar pela Partida.</li>
+          <li><strong>Outras ações:</strong> durante esses 2 turnos, pode mover-se, comprar ou vender motas e participar em Corridas Ilegais (nas corridas ilegais não há carta de condução).</li>
+        </ul>
+        <h4>2. Tentar Fugir (Risco &amp; Recompensa)</h4>
+        <p>O jogador lança <strong>1 dado de fuga</strong>:</p>
+        <ul>
+          <li><strong>Sucesso (4, 5 ou 6):</strong> o jogador escapa. Mantém a Carta de Condução e continua a receber normalmente os rendimentos das Apps. A mota utilizada na fuga ganha imediatamente <strong>1 Avaria Estética (Laranja)</strong>.</li>
+          <li><strong>Fracasso (1, 2 ou 3):</strong>
+            <ul>
+              <li>Aplicam-se todas as consequências de <strong>Entregar-se</strong> (recolha da frota, 1 turno sem jogar, carta apreendida 2 turnos).</li>
+              <li><strong>Apreensão do veículo:</strong> além disso, a mota utilizada na fuga fica apreendida no parque da Polícia.</li>
+              <li><strong>Resgate:</strong> a mota pode ser recuperada pagando <strong>20% do seu Preço de Aquisição</strong> no momento em que o jogador sai da prisão. Se não a resgatar nessa altura, só poderá recuperá-la mais tarde se voltar a parar exatamente na casa <strong>POLÍCIA (15)</strong>, pagando o mesmo valor.</li>
+            </ul>
+          </li>
+        </ul>
+        <h4>⚖️ Reincidência (apanhado sem Carta de Condução)</h4>
+        <p>Se o jogador for apanhado com a <strong>Carta de Condução apreendida</strong>, as penas <strong>duplicam</strong>:</p>
+        <ul>
+          <li><strong>Interceção numa corrida</strong> (entregar-se ou fuga falhada): <strong>2 turnos sem jogar</strong>, Carta de Condução apreendida durante <strong>4 turnos</strong> e resgate da mota a <strong>40%</strong> do Preço de Aquisição.</li>
+          <li><strong>Operação Stop:</strong> as <strong>multas duplicam</strong>.</li>
+        </ul>
+      </aside>
+
+      <h3>C) Reparação Manual na Oficina</h3>
+      <ul>
+        <li>O jogador escolhe <strong>1 avaria</strong> de uma das suas motas e declara a tentativa de Reparação Manual.</li>
+        <li>Lança <strong>5 dados, sem relançamentos</strong> (os dados e relançamentos das cartas das motas só contam nas corridas).</li>
+        <li>Se tirar <strong>um Trio ou uma mão superior na hierarquia</strong> (Full House, Sequência, Quadra ou Poker), a avaria é reparada por <strong>0 €</strong>.</li>
+        <li>Há <strong>apenas 1 tentativa</strong>. Se falhar, não repara nada e o turno termina.</li>
+      </ul>
+
+      <h3>D) Venda no Leilão</h3>
+      <ol>
+        <li><strong>Calcular o Valor Ajustado:</strong> ao <strong>Valor de Venda</strong> da carta da mota, desconta-se a soma das avarias presentes (−10%, −25% ou −50% por avaria).</li>
+        <li><strong>Lançar 5 Dados</strong> (sem relançamentos) para definir o valor base:
+          <ul>
+            <li><em>Carta Alta (Mercado Fraco):</em> <strong>80%</strong> do valor ajustado.</li>
+            <li><em>Par ou Dois Pares (Oferta Justa):</em> <strong>100%</strong> do valor ajustado.</li>
+            <li><em>Trio ou superior (Guerra de Licitações):</em> <strong>120%</strong> do valor ajustado.</li>
+          </ul>
+        </li>
+        <li><strong>Licitação entre jogadores:</strong> a partir desse valor base, qualquer outro jogador pode licitar para comprar a mota, e os restantes podem licitar mais alto. Ganha quem licitar mais.</li>
+        <li><strong>Venda ao Banco:</strong> se nenhum jogador licitar, a mota é vendida ao Banco (Comprador Virtual) pelo valor base dos dados.</li>
+        <li>A carta da mota vendida ao Banco vai para o fundo do baralho de motas e as suas avarias para o fundo do baralho de avarias.</li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="eventos">
+      <h2 id="eventos"><span class="section-number">08.</span> Cartas de Evento (Sorte ou Azar)</h2>
+      <ul>
+        <li><strong>Retirada de Cartas:</strong> ao parar nas casas <code>SORTE / AZAR</code> ou ao tirar <strong>duplos nos 2 dados de movimento</strong> (ex.: 3-3, 5-5). Os duplos não dão outra jogada.</li>
+        <li><strong>Tipos de Cartas:</strong>
+          <ul>
+            <li><code>EFEITO IMEDIATO</code>: resolvidas no momento e colocadas no fundo do baralho.</li>
+            <li><code>GUARDAR NA MÃO</code>: cartas táticas (ex.: <em>Vale de Reparação Grátis</em>, <em>Habeas Corpus</em>) que podem ser guardadas para usar mais tarde, ou vendidas a outros jogadores <strong>no Leilão</strong>.</li>
+          </ul>
+        </li>
+        <li><strong>Habeas Corpus:</strong> permite sair da Polícia ou cancelar a <strong>multa toda</strong> de uma Operação Stop.</li>
+      </ul>
+    </section>
+
+    <section class="section" aria-labelledby="classicas">
+      <h2 id="classicas"><span class="section-number">09.</span> Bónus exclusivo: Motas Clássicas</h2>
+      <ol>
+        <li><strong>Nostalgia Policial:</strong> na Operação Stop, 1 das avarias de cada mota Clássica é automaticamente ignorada.</li>
+        <li><strong>Aluguer para Eventos:</strong> o rendimento recebido nas casas de aplicações aumenta <strong>+20%</strong>.</li>
+        <li><strong>Valorização de Garagem:</strong> ao passar na casa <strong>PARTIDA</strong>, o jogador recebe um bónus extra por cada mota Clássica que possua:
+          <ul>
+            <li><em>Normal:</em> <strong>+100 €</strong> / volta</li>
+            <li><em>Rara:</em> <strong>+250 €</strong> / volta</li>
+            <li><em>Épica:</em> <strong>+500 €</strong> / volta</li>
+            <li><em>Lendária:</em> <strong>+1.000 €</strong> / volta</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="falencia">
+      <h2 id="falencia"><span class="section-number">10.</span> Falência e eliminação</h2>
+      <p>Quando um jogador tem de pagar um valor e <strong>não tem dinheiro suficiente</strong>, pode escolher:</p>
+      <ol>
+        <li><strong>Vender motas ao Banco:</strong> vende uma ou mais motas ao Banco por <strong>50% do Preço de Aquisição</strong>, já com o desconto das avarias.</li>
+        <li><strong>Leilão Rápido de Falência:</strong> põe uma ou mais motas à venda aos outros jogadores, em qualquer casa do tabuleiro.
+          <ul>
+            <li>O <strong>valor base</strong> de licitação é o <strong>maior</strong> destes dois valores: o valor da dívida a pagar, ou 50% do Preço de Aquisição da mota com o desconto das avarias.</li>
+            <li>Os jogadores licitam para cima e ganha quem licitar mais.</li>
+            <li>Se nenhum jogador licitar, a mota é vendida ao Banco (opção 1).</li>
+          </ul>
+        </li>
+        <li><strong>Eliminação:</strong> se o jogador não quiser vender motas, ou se já não tiver motas para vender, é <strong>eliminado do jogo</strong>:
+          <ul>
+            <li>as suas motas voltam para o baralho de motas, as suas avarias para o baralho de avarias e as suas cartas de Sorte/Azar por usar para o baralho de eventos;</li>
+            <li>os 3 baralhos são baralhados;</li>
+            <li>as vagas das Apps que ocupava ficam livres;</li>
+            <li>se restar apenas 1 jogador, esse jogador vence.</li>
+          </ul>
+        </li>
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="banqueiro">
+      <h2 id="banqueiro"><span class="section-number">11.</span> Gestão da banca e vitória</h2>
+      <p>A gestão da banca é feita pelo Bloco do Banqueiro, se estiverem a jogar manualmente, ou pela <a href="https://codehack2000.github.io/moto-tycoon-app/">aplicação web do banqueiro</a>. Na aplicação, o banqueiro pode ler o QR Code do cartão bancário de um jogador para aceder à sua conta e gerir o dinheiro; se a leitura não funcionar, pode selecionar o jogador manualmente. O simulador de vendas da aplicação ajuda a calcular o preço de venda das motas segundo as regras do leilão.</p>
+      <div class="summary-box">
+        <p><strong>Património Líquido = Saldo no Banco + Preço de Aquisição de cada mota − descontos das avarias de cada mota</strong></p>
+        <p>O Valor de Venda das cartas <strong>não conta</strong> para o património.</p>
+      </div>
+      <p>Seja qual for o método escolhido, os jogadores devem manter atualizados os saldos e o património.</p>
+      <p>O primeiro jogador a cumprir a condição de vitória estabelecida no início da partida é consagrado o verdadeiro <strong>MOTO TYCOON</strong>!</p>
+    </section>
+
+    <section class="section" aria-labelledby="errata">
+      <h2 id="errata"><span class="section-number">12.</span> Errata das cartas</h2>
+      <aside class="callout warning">
+        <p><strong>Motas Lendárias (#35 a #44):</strong> as cartas indicam <em>"5 Dados (2 Relançamentos)"</em>. O correto é <strong>6 Dados (2 Relançamentos)</strong>. Em caso de diferença, <strong>o manual prevalece sobre as cartas</strong>.</p>
+      </aside>
+    </section>
+  </main>
+
+
+  <footer class="manual-footer">
+    MOTO TYCOON — STREET &amp; GARAGE · Manual Oficial de Regras · Versão 2
+  </footer>
+
+  <script>
+    window.addEventListener("beforeprint", () => {
+      document.documentElement.dataset.printing = "true";
+    });
+    window.addEventListener("afterprint", () => {
+      delete document.documentElement.dataset.printing;
+    });
+  </script>
+</body>
+</html>
