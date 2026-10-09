@@ -77,13 +77,15 @@ const MARKET_LEVELS = [
 ];
 
 const VICTORY_MODES = [
-  { value: 'imperio-100', title: 'Império · Rápido', sub: 'Primeiro a 100.000 € de Património Líquido', chip: 'Império · 100.000 €', target: 100000, tone: 'hot' },
-  { value: 'imperio-200', title: 'Império · Padrão', sub: 'Primeiro a 200.000 € de Património Líquido', chip: 'Império · 200.000 €', target: 200000, tone: 'hot' },
-  { value: 'imperio-400', title: 'Império · Magnata', sub: 'Primeiro a 400.000 € de Património Líquido', chip: 'Império · 400.000 €', target: 400000, tone: 'hot' },
+  { value: 'imperio-rapido', title: 'Império · Rápido', sub: 'Primeiro a 40.000 € de Património Líquido', chip: 'Império · 40.000 €', target: 40000, tone: 'hot' },
+  { value: 'imperio-padrao', title: 'Império · Padrão', sub: 'Primeiro a 75.000 € de Património Líquido', chip: 'Império · 75.000 €', target: 75000, tone: 'hot' },
+  { value: 'imperio-longo', title: 'Império · Magnata', sub: 'Primeiro a 200.000 € de Património Líquido', chip: 'Império · 200.000 €', target: 200000, tone: 'hot' },
   { value: 'restauro', title: 'Mestre do Restauro', sub: 'Comprar, restaurar e vender no Leilão uma Clássica Lendária', chip: 'Mestre do Restauro', tone: 'yellow' },
   { value: 'cronometro', title: 'Cronómetro · 45 min', sub: 'Maior Património Líquido quando o tempo acabar', chip: 'Cronómetro · 45 min', tone: 'weak' },
 ];
-const DEFAULT_VICTORY = 'imperio-100';
+const DEFAULT_VICTORY = 'imperio-rapido';
+// Modos das regras v2 (100k/200k/400k) → níveis equivalentes das regras 2.1
+const LEGACY_VICTORY = { 'imperio-100': 'imperio-rapido', 'imperio-200': 'imperio-padrao', 'imperio-400': 'imperio-longo' };
 const TIMER_MINUTES = 45;
 
 const RARITY_CLASS = { Normal: 'rar-normal', Rara: 'rar-rara', 'Épica': 'rar-epica', 'Lendária': 'rar-lendaria' };
@@ -142,6 +144,8 @@ function normalizeState(s) {
   s.lastSetup = { ...defaultSetup(), ...(s.lastSetup || {}) };
   // Regras 2.1: o saldo inicial passou de 7.500 € para 10.000 €
   if (s.lastSetup.startBalance === 7500) s.lastSetup.startBalance = DEFAULT_BALANCE;
+  s.lastSetup.victory = LEGACY_VICTORY[s.lastSetup.victory] || s.lastSetup.victory;
+  if (s.victory) s.victory = LEGACY_VICTORY[s.victory] || s.victory;
   s.players.forEach((p) => {
     p.motos = p.motos || [];
     p.prisonTurns = p.prisonTurns || 0;
