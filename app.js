@@ -2681,6 +2681,17 @@ function init() {
 
   // Offline-first: service worker (só funciona em http/https, não em file://)
   if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    // Quando uma versão nova da app assume o controlo, recarrega para não ficar a meio entre versões
+    // (o jogo está guardado no localStorage; se houver um formulário aberto, espera que seja fechado)
+    const hadController = Boolean(navigator.serviceWorker.controller);
+    let reloading = false;
+    const reloadWhenIdle = () => {
+      if (reloading) return;
+      if ($$('dialog[open]').length) return setTimeout(reloadWhenIdle, 1000);
+      reloading = true;
+      location.reload();
+    };
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadController) reloadWhenIdle(); });
     navigator.serviceWorker.register('sw.js').catch(() => {});
   }
 }
