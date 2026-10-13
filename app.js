@@ -264,13 +264,14 @@ function addAvariaTo(player, m, tipo, motivo) {
     addSystemLog(`${player.name} · ${motoLabel(card)}: +avaria ${name}${extra}${motivo ? ` · ${motivo}` : ''}.`);
     toast(`💥 ${motoLabel(card)}: avaria ${name}${extra}`);
   }
+  let ended = null;
   if (isStopped(m) && m.app) {
-    const casa = m.app.casa;
+    ended = contractItem(player, m, '🔴 Avaria Crítica: a mota ficou parada e perde o contrato.');
+    addSystemLog(`${motoLabel(card)} ficou parada e saiu da ${slotLabel(m.app.casa)}.`);
     m.app = null;
-    addSystemLog(`${motoLabel(card)} ficou parada e saiu da ${slotLabel(casa)}.`);
-    notify(`🔴 ${motoLabel(card)} está parada: sai da ${slotLabel(casa)}. Tira a carta do tabuleiro.`);
   }
   refresh();
+  if (ended) showContractEnded([ended], 'Só pode voltar a uma App depois de reparar a avaria Crítica.');
 }
 
 /* ---------- Som & vibração ---------- */
@@ -347,6 +348,70 @@ function confirmDialog(title, message, okText = 'Confirmar') {
   return new Promise((resolve) => {
     confirmModal.addEventListener('close', () => resolve(confirmModal.returnValue === 'ok'), { once: true });
   });
+}
+
+/* ---------- Manual de regras (abre por cima de qualquer formulário) ---------- */
+const rulesModal = $('#rulesModal');
+
+function openRules() {
+  const frame = $('#rulesFrame');
+  if (!frame.getAttribute('src')) frame.src = 'regras.html';
+  if (!rulesModal.open) rulesModal.showModal();
+}
+
+/** Põe um botão 📖 no canto de cada formulário, para ver as regras sem o fechar. */
+function addRulesButtons() {
+  $$('dialog').forEach((d) => {
+    if (d === rulesModal) return;
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'icon-btn';
+    btn.dataset.rules = '';
+    btn.setAttribute('aria-label', 'Abrir o manual de regras');
+    btn.textContent = '📖';
+    const close = $('.sheet-head > [data-close]', d);
+    if (close) {
+      close.before(btn);
+    } else {
+      btn.classList.add('icon-btn-sm', 'rules-corner');
+      d.prepend(btn);
+    }
+  });
+}
+
+/* ---------- Aviso de fim de contrato nas Apps ---------- */
+const contractModal = $('#contractModal');
+
+/** Item do aviso; chamar antes de limpar m.app. */
+function contractItem(p, m, why) {
+  return { color: p.color, owner: p.name, moto: motoLabel(cardOf(m)), slot: slotLabel(m.app.casa), why };
+}
+
+/**
+ * Aviso bem visível de que motas saíram das Apps: obriga a confirmar que a carta foi tirada do tabuleiro.
+ * Se o aviso já estiver aberto, junta os novos itens. Resolve quando o banqueiro o fecha.
+ */
+function showContractEnded(items, note = '') {
+  if (!items.length) return Promise.resolve();
+  const list = $('#contractList');
+  const html = items.map((it) => `
+    <li style="--pc:${it.color}">
+      <b>${escapeHtml(it.moto)}</b>
+      <span>sai da <b>${escapeHtml(it.slot)}</b> · dono: <b class="contract-owner">${escapeHtml(it.owner)}</b></span>
+      <small>${escapeHtml(it.why)}</small>
+    </li>`).join('');
+  if (contractModal.open) {
+    list.insertAdjacentHTML('beforeend', html);
+    if (note) $('#contractNote').textContent = note;
+  } else {
+    list.innerHTML = html;
+    $('#contractNote').textContent = note || 'A vaga fica livre para outro jogador.';
+    contractModal.showModal();
+  }
+  const n = list.children.length;
+  $('#contractTitle').textContent = n === 1 ? '📋 Uma mota ficou sem contrato' : `📋 ${n} motas ficaram sem contrato`;
+  sfx('alarm');
+  return new Promise((resolve) => contractModal.addEventListener('close', resolve, { once: true }));
 }
 
 const choiceModal = $('#choiceModal');
@@ -426,6 +491,8 @@ function statusBadges(p) {
   if (p.prisonTurns > 0) badges.push(`<span class="sb sb-red">🚔 Preso · ${plural(p.prisonTurns, 'turno', 'turnos')}</span>`);
   if (p.licenseTurns > 0) badges.push(`<span class="sb sb-yellow">🪪 Sem carta · ${plural(p.licenseTurns, 'turno', 'turnos')}</span>`);
   if (!p.eliminated && p.balance < 0) badges.push('<span class="sb sb-red">⚠️ Falência</span>');
+  const lastLap = p.motos.filter((m) => m.app && m.app.laps === 1);
+  if (lastLap.length) badges.push(`<span class="sb sb-yellow">📋 Última volta · ${lastLap.map((m) => cardNum(m.cardId)).join(' ')}</span>`);
   if (state.winner === p.id) badges.push('<span class="sb sb-gold">🏆 Vencedor</span>');
   return badges.join('');
 }
@@ -573,7 +640,7 @@ function turnAlerts(p) {
   if (p.balance < 0) alerts.push('⚠️ Saldo negativo: tem de vender motas (Garagem) ou ser eliminado.');
   p.motos.forEach((m) => {
     const card = cardOf(m);
-    if (m.app && m.app.laps === 1) alerts.push(`📋 Na próxima Partida acaba o contrato de ${motoLabel(card)} na ${slotLabel(m.app.casa)}.`);
+    if (m.app && m.app.laps === 1) alerts.push(`📋 Última volta: ao passar na Partida, ${motoLabel(card)} sai da ${slotLabel(m.app.casa)} (fim de contrato).`);
     if (m.apreendida) alerts.push(`🅿️ ${motoLabel(card)} está apreendida (resgate ${formatMoney(rescueCost(m))}).`);
   });
   return alerts;
@@ -1307,9 +1374,11 @@ async function motoAction(action, el) {
     const price = bankPrice(m);
     const ok = await confirmDialog(`Vender ao Banco?`, `${motoLabel(card)} por ${formatMoney(price)} (50% do Preço de Aquisição com avarias).`, 'Vender');
     if (!ok) return;
+    const ended = m.app ? [contractItem(p, m, '🏦 Vendida ao Banco: a mota sai da App.')] : [];
     removeMoto(p, m.uid);
     addSystemLog(`🏦 ${p.name} vendeu ${motoLabel(card)} ao Banco (falência).`);
     transact(p.id, price, `Venda ao Banco (falência) · ${motoLabel(card)}`);
+    showContractEnded(ended, 'A carta da mota vai para o fundo do baralho.');
     return;
   }
   if (action === 'bankrupt-auction') {
@@ -1322,9 +1391,11 @@ async function motoAction(action, el) {
       reason: `Leilão de falência · ${motoLabel(card)}`,
       subtitle: 'Quem paga é o comprador. Se ninguém licitar, vende ao Banco.',
       onDone: (buyerId) => {
+        const ended = m.app ? [contractItem(p, m, '⚡ Vendida no Leilão de Falência: a mota sai da App.')] : [];
         moveMoto(p.id, m.uid, buyerId);
         addSystemLog(`⚡ ${motoLabel(card)} passou para ${getPlayer(buyerId).name} (leilão de falência).`);
         refresh();
+        showContractEnded(ended, `A mota passa para a garagem de ${getPlayer(buyerId).name}, fora das Apps.`);
       },
     });
     return;
@@ -1374,15 +1445,22 @@ function renderPartida() {
   const b = partidaBreakdown(p, partidaDraft);
   $('#ptPlayer').innerHTML = playerTag(p.id);
   const appMotos = p.motos.filter((m) => m.app);
+  const ending = appMotos.filter((m) => m.app.laps <= 1);
 
   $('#ptBody').innerHTML = `
+    ${ending.length ? `
+      <div class="contract-warn">
+        <b>📋 Fim de contrato nesta Partida</b>
+        ${ending.map((m) => `<span>${escapeHtml(motoLabel(cardOf(m)))} sai da <b>${slotLabel(m.app.casa)}</b></span>`).join('')}
+        <small>Recebe o rendimento desta última volta; depois a carta sai do tabuleiro e volta à garagem.</small>
+      </div>` : ''}
     <div class="breakdown pt-lines">
       <div><span>Subvenção de manutenção</span><strong>${formatMoney(b.base)}</strong></div>
       <div><span>10% das motas (${b.ownedCount})</span><strong>${formatMoney(b.ten)}</strong></div>
       ${b.apps.map((a) => {
         const card = cardOf(a.m);
         const after = a.m.app.laps - 1;
-        return `<div><span>📱 ${escapeHtml(motoLabel(card))}<br><small>${slotLabel(a.m.app.casa)} · ${after > 0 ? `faltam ${plural(after, 'volta', 'voltas')}` : '<b class="t-yellow">contrato termina</b>'}</small></span><strong>${formatMoney(a.value)}</strong></div>`;
+        return `<div><span>📱 ${escapeHtml(motoLabel(card))}<br><small>${slotLabel(a.m.app.casa)} · ${after > 1 ? `faltam ${after} voltas` : after === 1 ? '<b class="t-yellow">fica na última volta</b>' : '<b class="t-yellow">contrato termina</b>'}</small></span><strong>${formatMoney(a.value)}</strong></div>`;
       }).join('')}
       ${b.classic ? `<div><span>Valorização das Clássicas</span><strong>${formatMoney(b.classic)}</strong></div>` : ''}
     </div>
@@ -1410,19 +1488,25 @@ function applyPartida() {
   const p = getPlayer(partidaDraft.playerId);
   const b = partidaBreakdown(p, partidaDraft);
   const ended = [];
+  const lastLap = [];
   p.motos.filter((m) => m.app).forEach((m) => {
     m.app.laps -= 1;
     if (m.app.laps <= 0) {
-      ended.push(`${motoLabel(cardOf(m))} · ${slotLabel(m.app.casa)}`);
+      ended.push(contractItem(p, m, 'Fim de contrato: acabaram as voltas. A mota volta à garagem.'));
       addSystemLog(`📋 Fim de contrato: ${motoLabel(cardOf(m))} saiu da ${slotLabel(m.app.casa)} e voltou à garagem de ${p.name}.`);
       m.app = null;
+    } else if (m.app.laps === 1) {
+      lastLap.push(`${motoLabel(cardOf(m))} (${slotLabel(m.app.casa)})`);
     }
   });
   if (partidaDraft.rain) addSystemLog(`☔ ${p.name}: Chuva Intensa, sem rendimento das Apps nesta volta.`);
   partidaSheet.close();
   transact(p.id, b.total, 'Passou na Partida');
+  const lastLapText = lastLap.length ? `⚠️ Última volta de contrato: ${lastLap.join(', ')}. Sai na próxima Partida.` : '';
   if (ended.length) {
-    setTimeout(() => notify(`📋 Contrato terminado: ${ended.join(' · ')}. Tira a carta do tabuleiro e devolve-a à garagem.`), 400);
+    showContractEnded(ended, `${p.name} recebeu ${formatMoney(b.total)}. A vaga fica livre para outro jogador.${lastLapText ? ` ${lastLapText}` : ''}`);
+  } else if (lastLapText) {
+    notify(`🏁 ${p.name} recebeu ${formatMoney(b.total)} · ${lastLapText}`);
   } else {
     toast(`🏁 ${p.name} recebeu ${formatMoney(b.total)}`);
   }
@@ -1667,10 +1751,11 @@ async function submitRace() {
     const owner = getPlayer(race.opp);
     const ownerMoto = getMoto(owner.id, race.bUid);
     if (race.winner === 'a') {
+      const expelled = contractItem(owner, ownerMoto, `⚔️ Perdeu a disputa da vaga para ${a.name}.`);
       ownerMoto.app = null;
       addSystemLog(`⚔️ ${a.name} ganhou a disputa da ${slotLabel(race.casa)}: ${motoLabel(cardOf(ownerMoto))} de ${owner.name} foi expulsa.`);
       refresh();
-      notify(`⚔️ ${motoLabel(cardOf(ownerMoto))} sai da ${slotLabel(race.casa)}. Devolve a carta a ${owner.name}.`);
+      await showContractEnded([expelled], `${a.name} pode agora ocupar a vaga.`);
       if (a.licenseTurns > 0) {
         toast(`${a.name} tem a carta apreendida: não pode ocupar a vaga.`, true, 4000);
       } else {
@@ -1749,6 +1834,7 @@ function renderPolice() {
 function intercept(p, uid, caught) {
   const reincid = p.licenseTurns > 0;
   const recalled = p.motos.filter((m) => m.app);
+  const ended = recalled.map((m) => contractItem(p, m, '🚔 Detido pela Polícia: todas as motas saem das Apps.'));
   recalled.forEach((m) => { m.app = null; });
   p.prisonTurns = reincid ? 2 : 1;
   p.licenseTurns = reincid ? 4 : 2;
@@ -1764,6 +1850,7 @@ function intercept(p, uid, caught) {
   addSystemLog(`🚔 ${p.name} ${caught ? 'falhou a fuga' : 'entregou-se'}${reincid ? ' (reincidência)' : ''}: ${parts.join(', ')}.`);
   refresh();
   sfx('siren');
+  showContractEnded(ended, `Com a carta apreendida, ${p.name} não pode voltar a alocar motas durante ${plural(p.licenseTurns, 'turno', 'turnos')}.`);
   return `🚔 ${parts.join(' · ')}. Peão para a POLÍCIA (15); se passar pela Partida, recebe só o valor base.`;
 }
 
@@ -1845,7 +1932,9 @@ function renderApps() {
     }
     const card = cardOf(occ.moto);
     const fee = Math.round(appIncome(occ.moto) * VAGA_FEE_PCT / 100);
-    return `<div class="slot-card" style="--pc:${occ.player.color}">${head}
+    const lastLap = occ.moto.app.laps === 1;
+    return `<div class="slot-card ${lastLap ? 'is-ending' : ''}" style="--pc:${occ.player.color}">${head}
+      ${lastLap ? '<span class="slot-ending">📋 Última volta · sai na próxima Partida</span>' : ''}
       <button type="button" class="slot-moto" data-slot="open" data-casa="${s.casa}">
         <img src="${card.imagem}" alt="" width="120" height="72">
         <span class="moto-info">
@@ -2407,6 +2496,7 @@ function finishGarageSale(buyerId) {
   const m = getMoto(sellerId, uid);
   if (!m) return;
   const card = cardOf(m);
+  const ended = m.app ? [contractItem(seller, m, '🔨 Vendida no Leilão: a mota sai da App.')] : [];
   if (buyerId) {
     moveMoto(sellerId, uid, buyerId);
     addSystemLog(`🔨 ${motoLabel(card)} passou de ${seller.name} para ${getPlayer(buyerId).name} (Leilão).`);
@@ -2418,6 +2508,7 @@ function finishGarageSale(buyerId) {
   if (q) q.sold += 1;
   checkRestauroSale(sellerId, m);
   refresh();
+  showContractEnded(ended, buyerId ? `A mota passa para a garagem de ${getPlayer(buyerId).name}, fora das Apps.` : 'A carta da mota vai para o fundo do baralho.');
 }
 
 function initAuction() {
@@ -2500,17 +2591,18 @@ function switchTab(name) {
 
 async function resetGame() {
   const ok = await confirmDialog(
-    'Reiniciar o jogo?',
-    'Todos os saldos, garagens e o histórico serão apagados. Esta ação não pode ser desfeita.',
-    'Reiniciar',
+    'Começar um jogo novo?',
+    'O jogo atual termina: todos os saldos, garagens e o histórico serão apagados. Esta ação não pode ser desfeita.',
+    'Jogo novo',
   );
   if (!ok) return;
   clearInterval(timerInterval);
+  $$('dialog[open]').forEach((d) => d.close());
   state = freshState(state.lastSetup);
   saveState();
   resetAuction();
   showSetup();
-  toast('Jogo reiniciado.');
+  toast('Novo jogo: escolhe os jogadores e carrega em Iniciar.');
 }
 
 function showSetup() {
@@ -2518,6 +2610,7 @@ function showSetup() {
   renderSetup();
   $('#gameView').hidden = true;
   $('#setupView').hidden = false;
+  $('#newGameBtn').hidden = true;
   window.scrollTo({ top: 0 });
 }
 
@@ -2527,6 +2620,7 @@ function showGame() {
   switchTab('bank');
   $('#setupView').hidden = true;
   $('#gameView').hidden = false;
+  $('#newGameBtn').hidden = false;
   keepScreenAwake();
 }
 
@@ -2561,6 +2655,11 @@ function init() {
   });
   $('#undoBtn').addEventListener('click', undoLast);
   $('#resetBtn').addEventListener('click', resetGame);
+  $('#newGameBtn').addEventListener('click', resetGame);
+  addRulesButtons();
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('[data-rules]')) openRules();
+  });
   $$('[data-close]').forEach((b) => b.addEventListener('click', () => b.closest('dialog').close()));
   $('#choiceList').addEventListener('click', (e) => {
     const btn = e.target.closest('[data-choice]');

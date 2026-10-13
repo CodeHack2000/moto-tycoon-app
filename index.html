@@ -16,6 +16,8 @@
 </head>
 <body>
   <header class="topbar">
+    <button id="newGameBtn" type="button" class="topbar-btn topbar-left" aria-label="Começar jogo novo">🆕<span>Novo jogo</span></button>
+    <button type="button" class="topbar-btn topbar-right" data-rules aria-label="Abrir o manual de regras">📖<span>Regras</span></button>
     <div class="brand">
       <span class="brand-title"><span class="brand-moto">MOTO</span><span class="brand-tycoon">TYCOON</span></span>
       <span class="brand-sub">Terminal Bancário · Street &amp; Garage</span>
@@ -176,7 +178,7 @@
 
     <!-- Regras -->
     <section id="tab-rules" class="tab-panel" role="tabpanel" hidden>
-      <a class="btn btn-primary btn-xl" href="regras.html" target="_blank" rel="noopener">📖 Abrir o Manual de Regras completo</a>
+      <button type="button" class="btn btn-primary btn-xl" data-rules>📖 Abrir o Manual de Regras completo</button>
 
       <h3 class="section-title ref-title">Partida (por volta)</h3>
       <div class="card ref-card">
@@ -187,7 +189,7 @@
       <h3 class="section-title ref-title">Compras e cartas de evento</h3>
       <div class="card ref-card">
         <p><strong>Sucata e Feira:</strong> a mota comprada leva <strong>1 avaria</strong>, tirada só depois da compra (máximo de 2 avarias por mota mantém-se).</p>
-        <p><strong>Sorte / Azar e duplos:</strong> tira <strong>2 cartas e fica com 1</strong>; a outra vai para o fundo do baralho.</p>
+        <p><strong>Sorte / Azar e duplos:</strong> tira <strong>só 1 carta</strong> e resolve-a (não pode escolher nem recusar).</p>
       </div>
 
       <h3 class="section-title ref-title">Reparação na Oficina</h3>
@@ -265,7 +267,7 @@
       <p class="hint">"Anular" repõe saldos. Para corrigir a garagem (motas, avarias, Apps), usa a ficha da mota.</p>
       <ul id="fullLog" class="log"></ul>
 
-      <button id="resetBtn" type="button" class="btn btn-danger btn-xl">⟲ Reiniciar Jogo</button>
+      <button id="resetBtn" type="button" class="btn btn-danger btn-xl">🆕 Começar jogo novo</button>
     </section>
   </main>
 
@@ -302,7 +304,7 @@
         <button type="button" class="btn" data-pm-tool="race">🏎️ Corrida</button>
       </div>
 
-      <span class="field-label">Cartas de Sorte / Azar · tira 2, fica com 1</span>
+      <span class="field-label">Cartas de Sorte / Azar</span>
       <div id="pmQuick" class="quick-actions"></div>
 
       <div class="custom-amount">
@@ -434,9 +436,9 @@
         <small>Escreve o número da carta ou parte do nome</small>
       </div>
       <button type="button" class="icon-btn" data-close aria-label="Fechar">✕</button>
+      <input id="motoSearch" class="input-plain moto-search" type="search" placeholder="ex: 40 ou bimota" autocomplete="off" enterkeyhint="search">
     </div>
-    <input id="motoSearch" class="input-plain moto-search" type="search" placeholder="ex: 40 ou bimota" autocomplete="off" enterkeyhint="search">
-    <ul id="motoList" class="moto-list"></ul>
+  <ul id="motoList" class="moto-list"></ul>
   </dialog>
 
   <!-- ============ SCANNER ============ -->
@@ -476,6 +478,24 @@
         <button id="confirmOk" value="ok" class="btn btn-danger btn-xl">Confirmar</button>
       </div>
     </form>
+  </dialog>
+
+  <!-- ============ FIM DE CONTRATO NAS APPS ============ -->
+  <dialog id="contractModal" class="sheet sheet-small contract-modal">
+    <h2 id="contractTitle" class="confirm-title"></h2>
+    <ul id="contractList" class="contract-list"></ul>
+    <p id="contractNote" class="confirm-msg"></p>
+    <button type="button" class="btn btn-primary btn-xl" data-close>✔ Feito, carta tirada do tabuleiro</button>
+  </dialog>
+
+  <!-- ============ MANUAL DE REGRAS (abre por cima de tudo) ============ -->
+  <dialog id="rulesModal" class="rules-modal">
+    <div class="rules-head">
+      <h2>📖 Manual de Regras</h2>
+      <a class="link-btn" href="regras.html" target="_blank" rel="noopener">Abrir à parte ↗</a>
+      <button type="button" class="icon-btn" data-close aria-label="Fechar o manual">✕</button>
+    </div>
+    <iframe id="rulesFrame" title="Manual de Regras"></iframe>
   </dialog>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

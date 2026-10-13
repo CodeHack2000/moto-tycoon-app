@@ -56,8 +56,33 @@ h1, h2, h3 { margin: 0; }
 
 /* ---------- Topbar ---------- */
 .topbar {
+  position: relative;
   padding: calc(env(safe-area-inset-top) + 14px) var(--gutter) 10px;
   text-align: center;
+}
+.topbar-btn {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 12px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  min-width: 52px;
+  padding: 5px 6px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  font-size: 18px;
+  line-height: 1;
+}
+.topbar-btn span { font-size: 10px; font-weight: 700; color: var(--muted); letter-spacing: 0.02em; }
+.topbar-btn:active { transform: scale(0.95); }
+.topbar-left { left: 10px; }
+.topbar-right { right: 10px; }
+@media (max-width: 400px) {
+  .topbar { padding-left: 70px; padding-right: 70px; }
+  .brand-title { font-size: 22px; }
+  .brand-sub { letter-spacing: 0.12em; }
 }
 .brand { display: flex; flex-direction: column; align-items: center; gap: 2px; }
 .brand-title {
@@ -571,7 +596,20 @@ dialog::backdrop { background: rgba(5, 7, 12, 0.78); backdrop-filter: blur(3px);
   dialog.sheet { margin: auto; border-radius: 22px; border-bottom: 1px solid var(--border); max-height: 94dvh; }
 }
 
-.sheet-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+/* O cabeçalho fica preso ao topo: ✕ e 📖 continuam à mão quando o formulário é comprido */
+.sheet-head {
+  position: sticky;
+  top: -18px;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: -18px calc(var(--gutter) * -1) 14px;
+  padding: 18px var(--gutter) 10px;
+  background: var(--surface);
+}
+.sheet-head .moto-search { flex-basis: 100%; margin: 4px 0 0; }
 .sheet-head-text { flex: 1; min-width: 0; }
 .sheet-head-text h2 { font-size: 20px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sheet-head-text small { font-size: 13px; color: var(--muted); }
@@ -674,6 +712,64 @@ dialog::backdrop { background: rgba(5, 7, 12, 0.78); backdrop-filter: blur(3px);
 .sheet-small { max-width: 420px; }
 .confirm-title { font-size: 20px; margin-bottom: 8px; }
 .confirm-msg { color: var(--muted); margin: 0 0 18px; }
+/* Botão 📖 no canto dos diálogos pequenos (sem cabeçalho) */
+.rules-corner { position: absolute; top: 12px; right: 12px; z-index: 3; }
+.rules-corner ~ .confirm-title, .rules-corner ~ form .confirm-title { padding-right: 44px; }
+
+/* ---------- Fim de contrato nas Apps ---------- */
+.contract-modal { border-top: 3px solid var(--dmg-yellow); }
+.contract-list { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 8px; }
+.contract-list li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  border: 1px solid rgba(255, 210, 63, 0.45);
+  border-left: 4px solid var(--pc);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 210, 63, 0.08);
+  font-size: 14px;
+}
+.contract-list li > b:first-child { font-size: 16px; }
+.contract-list small { color: var(--muted); font-size: 13px; }
+.contract-owner { color: var(--pc); }
+.contract-warn {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--dmg-yellow);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 210, 63, 0.1);
+  font-size: 14px;
+}
+.contract-warn > b { color: var(--dmg-yellow); font-size: 15px; }
+.contract-warn small { color: var(--muted); font-size: 12px; }
+
+/* ---------- Manual de regras em ecrã inteiro ---------- */
+.rules-modal {
+  width: 100%;
+  max-width: 900px;
+  height: 100dvh;
+  max-height: 100dvh;
+  margin: 0 auto;
+  padding: 0;
+  display: none;
+  flex-direction: column;
+  background: var(--surface);
+  color: var(--text);
+  border: 0;
+}
+.rules-modal[open] { display: flex; animation: sheet-in 0.22s ease-out; }
+.rules-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(env(safe-area-inset-top) + 10px) var(--gutter) 10px;
+  border-bottom: 1px solid var(--border);
+}
+.rules-head h2 { flex: 1; min-width: 0; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rules-head .link-btn { text-decoration: none; white-space: nowrap; }
+.rules-modal iframe { flex: 1; width: 100%; border: 0; background: #fff; }
 
 /* ---------- Toast ---------- */
 .toast {
@@ -809,7 +905,6 @@ dialog::backdrop { background: rgba(5, 7, 12, 0.78); backdrop-filter: blur(3px);
 
 /* ---------- Catálogo de motas ---------- */
 .sheet-tall { min-height: 80dvh; }
-.moto-search { position: sticky; top: -18px; z-index: 1; margin-bottom: 12px; }
 .moto-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .moto-row, .moto-pick {
   display: flex;
@@ -1102,6 +1197,15 @@ dialog::backdrop { background: rgba(5, 7, 12, 0.78); backdrop-filter: blur(3px);
   border-radius: var(--radius);
 }
 .slot-card.is-free { border-style: dashed; border-top-style: dashed; }
+.slot-card.is-ending { border-color: var(--dmg-yellow); box-shadow: 0 0 14px rgba(255, 210, 63, 0.25); }
+.slot-ending {
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: rgba(255, 210, 63, 0.14);
+  color: var(--dmg-yellow);
+  font-size: 11px;
+  font-weight: 700;
+}
 .slot-head { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; }
 .slot-head b { font-size: 13px; letter-spacing: 0.04em; }
 .slot-head span { font-size: 11px; color: var(--muted); font-family: var(--font-num); }
